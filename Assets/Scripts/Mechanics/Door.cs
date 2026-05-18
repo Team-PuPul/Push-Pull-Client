@@ -1,77 +1,96 @@
 using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class Door : MonoBehaviour
+public class Door : NetworkBehaviour
 {
-    bool enteredPlayer1;
-    bool enteredPlayer2;
+    [SerializeField] private int requiredPlayers = 2;
 
+    [SyncVar]
     public bool isCleared;
 
-    int keyCount;
-    [SerializeField] GameObject clearUI;
-    LevelLoader levelLoader;
-    KeyCounter keyCounter;
+    private readonly HashSet<uint> enteredPlayers = new HashSet<uint>();
 
-    //NewPlayer1 player1;
-    //NewPlayer2 player2;
+    private int keyCount;
+    [SerializeField] GameObject clearUI;
+    private KeyCounter keyCounter;
+
     [SerializeField]
     AudioClip clip1;
     [SerializeField]
     AudioClip clip2;
+
     private void Start()
     {
         keyCounter = FindObjectOfType<KeyCounter>();
-        levelLoader = FindObjectOfType<LevelLoader>();
         Key[] currentKeys = FindObjectsOfType<Key>();
         keyCount = currentKeys.Length;
     }
 
+    [ServerCallback]
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //if(collision.TryGetComponent<NewPlayer1>(out var player1))
-        //{
-        //    enteredPlayer1 = true;
-        //    this.player1 = player1;
-        //}
-        //if(collision.TryGetComponent<NewPlayer2>(out var player2))
-        //{
-        //    enteredPlayer2 = true;
-        //    this.player2 = player2;
-        //}
+        if (!TryGetPlayerIdentity(collision, out NetworkIdentity playerIdentity))
+            return;
 
-        if (enteredPlayer1 && enteredPlayer2)
-            StartCoroutine(NextStage());
+        enteredPlayers.Add(playerIdentity.netId);
+        TryClearStage();
     }
 
+    [ServerCallback]
     private void OnTriggerExit2D(Collider2D collision)
     {
-        //if (collision.GetComponent<NewPlayer1>() != null)
-        //{
-        //    enteredPlayer1 = false;
-        //}
-        //if (collision.GetComponent<NewPlayer2>() != null)
-        //{
-        //    enteredPlayer2 = false;
-        //}
+        if (!TryGetPlayerIdentity(collision, out NetworkIdentity playerIdentity))
+            return;
+
+        enteredPlayers.Remove(playerIdentity.netId);
     }
 
-    IEnumerator NextStage()
+    [Server]
+    private void TryClearStage()
     {
         if (isCleared)
-            yield break;
+            return;
 
-        if(keyCounter.KeyCount == keyCount)
-        {
-            isCleared = true;
-            //player1.Cleared();
-            //player2.Cleared();
-            SoundManager.Instance.SFXPlay("Clear", clip1);
-            yield return new WaitForSeconds(1.5f);
-            SoundManager.Instance.SFXPlay("Clear", clip2);
-            clearUI.SetActive(true);
-        }
+        if (enteredPlayers.Count < requiredPlayers)
+            return;
+
+        if (keyCounter == null)
+            keyCounter = FindObjectOfType<KeyCounter>();
+
+        if (keyCounter == null || keyCounter.KeyCount != keyCount)
+            return;
+
+        isCleared = true;
+        StartCoroutine(ClearStage());
+    }
+
+    [Server]
+    private bool TryGetPlayerIdentity(Collider2D collision, out NetworkIdentity playerIdentity)
+    {
+        playerIdentity = collision.GetComponentInParent<NetworkIdentity>();
+        return playerIdentity != null && playerIdentity.connectionToClient != null;
+    }
+
+    [Server]
+    private IEnumerator ClearStage()
+    {
+        RpcPlayClearStart();
+        yield return new WaitForSeconds(1.5f);
+        RpcShowClearUI();
+    }
+
+    [ClientRpc]
+    private void RpcPlayClearStart()
+    {
+        SoundManager.Instance.SFXPlay("Clear", clip1);
+    }
+
+    [ClientRpc]
+    private void RpcShowClearUI()
+    {
+        SoundManager.Instance.SFXPlay("Clear", clip2);
+        clearUI.SetActive(true);
     }
 }
