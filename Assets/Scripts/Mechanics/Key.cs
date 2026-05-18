@@ -1,23 +1,40 @@
+using Mirror;
 using UnityEngine;
 
-public interface IGetable
+public class Key : NetworkBehaviour
 {
-    public void Get();
-}
+    private KeyCounter counter;
+    private bool collected;
 
-public class Key : MonoBehaviour, IGetable
-{
-    KeyCounter counter;
     [SerializeField]
     AudioClip clip;
-    void Start()
+    private AudioClip clip;
+
+    private void Start()
     {
         counter = FindObjectOfType<KeyCounter>();
     }
-    public void Get()
+
+    [Server]
+    public void CollectOnServer()
     {
-        SoundManager.Instance.SFXPlay("GetKey",clip);
+        if (collected)
+            return;
+
+        collected = true;
+        RpcApplyCollect();
+
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    private void RpcApplyCollect()
+    {
+        SoundManager.Instance.SFXPlay("GetKey", clip);
+
+        if (counter == null)
+            counter = FindObjectOfType<KeyCounter>();
+
         counter.AddCount();
-        Destroy(gameObject);
     }
 }
