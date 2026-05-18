@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Door : NetworkBehaviour
 {
@@ -17,6 +18,8 @@ public class Door : NetworkBehaviour
 
     [SerializeField]
     private GameObject clearUI;
+
+    [SerializeField]
     private KeyCounter keyCounter;
 
     [SerializeField]
@@ -25,9 +28,14 @@ public class Door : NetworkBehaviour
     [SerializeField]
     private AudioClip clip2;
 
+    private string NetworkLogContext =>
+        $"[Door:{gameObject.name}] scene={SceneManager.GetActiveScene().name}, "
+        + $"isServer={isServer}, isClient={isClient}, netId={netId}";
+
     private void Awake()
     {
-        keyCounter = FindObjectOfType<KeyCounter>();
+        if (keyCounter == null)
+            keyCounter = FindObjectOfType<KeyCounter>();
     }
 
     private void Start()
@@ -41,7 +49,9 @@ public class Door : NetworkBehaviour
         }
         else
         {
-            Debug.LogError("KeyCounter를 찾을 수 없습니다.");
+            Debug.LogError(
+                $"{NetworkLogContext} KeyCounter를 찾을 수 없어 키 변경 이벤트를 구독할 수 없습니다."
+            );
         }
     }
 
@@ -83,7 +93,9 @@ public class Door : NetworkBehaviour
 
         if (keyCounter == null)
         {
-            Debug.LogError("KeyCounter를 찾을 수 없습니다.");
+            Debug.LogError(
+                $"{NetworkLogContext} KeyCounter를 찾을 수 없어 클리어 판정을 진행할 수 없습니다."
+            );
             return;
         }
 
@@ -98,7 +110,26 @@ public class Door : NetworkBehaviour
     private bool TryGetPlayerIdentity(Collider2D collision, out NetworkIdentity playerIdentity)
     {
         playerIdentity = collision.GetComponentInParent<NetworkIdentity>();
-        return playerIdentity != null && playerIdentity.connectionToClient != null;
+
+        if (playerIdentity == null)
+        {
+            Debug.LogWarning(
+                $"{NetworkLogContext} 문 트리거에 NetworkIdentity 없는 오브젝트가 들어왔습니다. "
+                    + $"object={collision.gameObject.name}"
+            );
+            return false;
+        }
+
+        if (playerIdentity.connectionToClient == null)
+        {
+            Debug.LogWarning(
+                $"{NetworkLogContext} 문 트리거에 플레이어가 아닌 네트워크 오브젝트가 들어왔습니다. "
+                    + $"object={collision.gameObject.name}, targetNetId={playerIdentity.netId}"
+            );
+            return false;
+        }
+
+        return true;
     }
 
     [Server]

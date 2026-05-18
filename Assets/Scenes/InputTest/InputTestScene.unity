@@ -4353,6 +4353,17 @@ TilemapCollider2D:
   m_MaximumTileChangeCount: 1000
   m_ExtrusionFactor: 0
   m_UseDelaunayMesh: 0
+--- !u!114 &1758901631 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2893167314377516909, guid: 203ca478c2f9d3640895252169ff28a7, type: 3}
+  m_PrefabInstance: {fileID: 1932231900}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1d6238ced45d2b4e81c494086536202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1885792382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4599,6 +4610,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 203ca478c2f9d3640895252169ff28a7, type: 3}
+--- !u!114 &2068034370 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1501332673472331470, guid: 9bea672f8d5bf35439ea9bdbb86ac278, type: 3}
+  m_PrefabInstance: {fileID: 2104109436}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61d51da383db1474d8a52d67afdc12f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2071023357
 GameObject:
   m_ObjectHideFlags: 0
@@ -4757,6 +4779,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3286936841291549159, guid: 83d34dc1ad0e4a14081090ed4c77790d, type: 3}
+      propertyPath: countUI
+      value: 
+      objectReference: {fileID: 1758901631}
+    - target: {fileID: 3286936841291549159, guid: 83d34dc1ad0e4a14081090ed4c77790d, type: 3}
+      propertyPath: _maxCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3286936841291549159, guid: 83d34dc1ad0e4a14081090ed4c77790d, type: 3}
+      propertyPath: _keys.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3286936841291549159, guid: 83d34dc1ad0e4a14081090ed4c77790d, type: 3}
+      propertyPath: _keys.Array.data[0]
+      value: 
+      objectReference: {fileID: 2068034370}
     - target: {fileID: 4660550325561338940, guid: 83d34dc1ad0e4a14081090ed4c77790d, type: 3}
       propertyPath: m_Name
       value: KeyCounter
