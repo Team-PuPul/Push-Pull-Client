@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class KeyCounter : MonoBehaviour
 {
+    public event Action OnKeyCountChanged;
+
     [SerializeField]
     private List<Key> _keys = new List<Key>();
 
@@ -14,20 +17,25 @@ public class KeyCounter : MonoBehaviour
     private void Awake()
     {
         ResetCount();
-        Key[] currentKeys = FindObjectsOfType<Key>();
 
+        Key[] currentKeys = FindObjectsOfType<Key>();
         countUI = FindObjectOfType<KeyCountUI>();
+
         foreach (var key in currentKeys)
         {
             _keys.Add(key);
         }
+
         _maxCount = _keys.Count;
     }
 
     public void AddCount(int amount = 1)
     {
         if (KeyCount + amount <= _maxCount)
+        {
             KeyCount += amount;
+            OnKeyCountChanged?.Invoke();
+        }
 
         countUI.SetCountText();
         Debug.Log(KeyCount);
