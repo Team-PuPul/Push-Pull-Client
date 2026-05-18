@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class Door : NetworkBehaviour
 {
-    [SerializeField] private int requiredPlayers = 2;
+    [SerializeField]
+    private int requiredPlayers = 2;
 
     [SyncVar]
     public bool isCleared;
@@ -13,26 +14,43 @@ public class Door : NetworkBehaviour
     private readonly HashSet<uint> enteredPlayers = new HashSet<uint>();
 
     private int keyCount;
-    [SerializeField] GameObject clearUI;
+
+    [SerializeField]
+    private GameObject clearUI;
     private KeyCounter keyCounter;
 
     [SerializeField]
-    AudioClip clip1;
+    private AudioClip clip1;
+
     [SerializeField]
-    AudioClip clip2;
+    private AudioClip clip2;
+
+    private void Awake()
+    {
+        keyCounter = FindObjectOfType<KeyCounter>();
+    }
 
     private void Start()
     {
-        keyCounter = FindObjectOfType<KeyCounter>();
         Key[] currentKeys = FindObjectsOfType<Key>();
         keyCount = currentKeys.Length;
 
-        CurrentKeyCount = keyCounter.KeyCount;
+        if (keyCounter != null)
+        {
+            keyCounter.OnKeyCountChanged += TryClearStage;
+        }
+        else
+        {
+            Debug.LogError("KeyCounter를 찾을 수 없습니다.");
+        }
     }
 
-    private void Update()
+    private void OnDestroy()
     {
-        CurrentKeyCount = keyCounter.KeyCount;
+        if (keyCounter != null)
+        {
+            keyCounter.OnKeyCountChanged -= TryClearStage;
+        }
     }
 
     [ServerCallback]
@@ -64,9 +82,12 @@ public class Door : NetworkBehaviour
             return;
 
         if (keyCounter == null)
-            keyCounter = FindObjectOfType<KeyCounter>();
+        {
+            Debug.LogError("KeyCounter를 찾을 수 없습니다.");
+            return;
+        }
 
-        if (keyCounter == null || keyCounter.KeyCount != keyCount)
+        if (keyCounter.KeyCount != keyCount)
             return;
 
         isCleared = true;
@@ -91,6 +112,11 @@ public class Door : NetworkBehaviour
     [ClientRpc]
     private void RpcPlayClearStart()
     {
+        foreach (InputPlayer inputPlayer in FindObjectsOfType<InputPlayer>())
+        {
+            inputPlayer.Cleared();
+        }
+
         SoundManager.Instance.SFXPlay("Clear", clip1);
     }
 
