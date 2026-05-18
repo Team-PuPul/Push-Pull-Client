@@ -26,6 +26,13 @@ public class Door : NetworkBehaviour
         keyCounter = FindObjectOfType<KeyCounter>();
         Key[] currentKeys = FindObjectsOfType<Key>();
         keyCount = currentKeys.Length;
+
+        CurrentKeyCount = keyCounter.KeyCount;
+    }
+
+    private void Update()
+    {
+        CurrentKeyCount = keyCounter.KeyCount;
     }
 
     [ServerCallback]
