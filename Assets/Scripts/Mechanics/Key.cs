@@ -7,7 +7,6 @@ public class Key : NetworkBehaviour
     private bool collected;
 
     [SerializeField]
-    AudioClip clip;
     private AudioClip clip;
 
     private void Start()
