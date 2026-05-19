@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using kcp2k;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
 using UnityEngine;
 #if UNITY_EDITOR
 namespace Edgegap
