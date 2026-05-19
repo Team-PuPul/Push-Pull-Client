@@ -60,12 +60,11 @@ jobs:
 
       - name: Zip build output
         run: |
-          cd builds
-          zip -r ${{ matrix.buildName }}.zip ${{ matrix.targetPlatform }}
+          zip -r "${RUNNER_TEMP}/${{ matrix.buildName }}.zip" "builds/${{ matrix.targetPlatform }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.buildName }}-${{ github.sha }}
-          path: builds/${{ matrix.buildName }}.zip
+          path: ${{ runner.temp }}/${{ matrix.buildName }}.zip
           retention-days: 14
