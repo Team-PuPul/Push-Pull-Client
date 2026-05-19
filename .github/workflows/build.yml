@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - targetPlatform: StandaloneWindows64
-            buildName: Windows
+            buildName: "Push&Pull"
 
     steps:
       - name: Checkout repository
@@ -58,13 +58,17 @@ jobs:
           buildsPath: builds
           versioning: Semantic
 
-      - name: Zip build output
+      - name: Prepare artifact
         run: |
-          zip -r "${RUNNER_TEMP}/${{ matrix.buildName }}.zip" "builds/${{ matrix.targetPlatform }}"
+          set -euo pipefail
+          rm -rf "${RUNNER_TEMP}/artifact"
+          mkdir -p "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}"
+          cp -a "builds/${{ matrix.targetPlatform }}/." "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}/"
+          cp steam_appid.txt "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}/steam_appid.txt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.buildName }}-${{ github.sha }}
-          path: ${{ runner.temp }}/${{ matrix.buildName }}.zip
+          name: ${{ matrix.buildName }}
+          path: ${{ runner.temp }}/artifact
           retention-days: 14
