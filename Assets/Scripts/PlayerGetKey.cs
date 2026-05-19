@@ -1,20 +1,29 @@
+using Mirror;
 using UnityEngine;
 
-public class PlayerGetKey : MonoBehaviour
+public class PlayerGetKey : NetworkBehaviour
 {
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.TryGetComponent<IGetable>(out IGetable getKey))
+        if (!isLocalPlayer)
+            return;
+
+        if (collision.gameObject.TryGetComponent<Key>(out Key key))
         {
-            if (getKey != null)
-            {
-                Debug.Log("¿­¼è È¹µæ °¡´É");
-                getKey.Get();
-            }
-            else
-            {
-                Debug.LogWarning("Key°¡ ¾ø½À´Ï´Ù");
-            }
+            CmdCollectKey(key.netIdentity);
         }
+    }
+
+    [Command]
+    private void CmdCollectKey(NetworkIdentity keyIdentity)
+    {
+        if (keyIdentity == null)
+            return;
+
+        Key key = keyIdentity.GetComponent<Key>();
+        if (key == null)
+            return;
+
+        key.CollectOnServer();
     }
 }
