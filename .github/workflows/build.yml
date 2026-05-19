@@ -1,29 +1,25 @@
 name: Unity CI — Desktop Build
- 
+
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
- 
+    branches:
+      - develop
+  workflow_dispatch: {}
+
 env:
   UNITY_VERSION: auto
- 
+
 jobs:
   build:
-    runs-on: ${{ matrix.runs-on || 'ubuntu-latest' }}
+    name: build (${{ matrix.targetPlatform }}, ${{ matrix.buildName }})
+    runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         include:
           - targetPlatform: StandaloneWindows64
             buildName: Windows
-          - targetPlatform: StandaloneLinux64
-            buildName: Linux
-          - targetPlatform: StandaloneOSX
-            buildName: macOS
-            runs-on: macos-latest
 
     steps:
       - name: Checkout repository
@@ -31,21 +27,20 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
- 
+
       - name: Cache LFS objects
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .git/lfs/objects
           key: lfs-${{ hashFiles('.lfs-assets-id') }}
-          restore-keys: lfs-
- 
-      # Library 캐시 (빌드 시간 50~80% 단축)
+          restore-keys: |
+            lfs-
+
       - name: Cache Unity Library
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: Library
-          key: |
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**','Packages/**','ProjectSettings/**') }}
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
             Library-
@@ -61,14 +56,13 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: ${{ matrix.buildName }}
           buildsPath: builds
-          buildMethod: BuildScript.BuildProject
           versioning: Semantic
- 
+
       - name: Zip build output
         run: |
           cd builds
           zip -r ${{ matrix.buildName }}.zip ${{ matrix.targetPlatform }}
- 
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
