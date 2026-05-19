@@ -57,6 +57,16 @@ jobs:
           buildName: ${{ matrix.buildName }}
           buildsPath: builds
           versioning: Semantic
+          customParameters: -logFile /github/workspace/unity-build.log
+
+      - name: Upload Unity build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity-Build-Log-${{ github.sha }}
+          path: unity-build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Zip build output
         run: |
