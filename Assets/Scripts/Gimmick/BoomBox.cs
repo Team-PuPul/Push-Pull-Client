@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
@@ -26,7 +27,16 @@ public class BoomBox : NetworkBehaviour
     [SerializeField]
     private LayerMask explosionTargetLayer;
 
+    [SyncVar(hook = nameof(OnExplodedChanged))]
     private bool exploded;
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        if (exploded)
+            ApplyExplodedState();
+    }
 
     [ServerCallback]
     private void OnTriggerEnter2D(Collider2D other)
@@ -52,12 +62,30 @@ public class BoomBox : NetworkBehaviour
         if (exploded)
             return;
 
+        ApplyExplosionForce();
+
         exploded = true;
 
-        ApplyExplosionForce();
-        StopBoomBoxPhysics();
+        RpcPlayExplosionEffect();
+    }
 
-        RpcExplode();
+    private void OnExplodedChanged(bool oldValue, bool newValue)
+    {
+        if (!newValue)
+            return;
+
+        ApplyExplodedState();
+    }
+
+    private void ApplyExplodedState()
+    {
+        if (boxRenderer != null)
+            boxRenderer.enabled = false;
+
+        if (boxCollider != null)
+            boxCollider.enabled = false;
+
+        StopBoomBoxPhysics();
     }
 
     [Server]
@@ -69,6 +97,8 @@ public class BoomBox : NetworkBehaviour
             explosionTargetLayer
         );
 
+        HashSet<Rigidbody2D> affectedRigidbodies = new HashSet<Rigidbody2D>();
+
         foreach (Collider2D hit in hits)
         {
             Rigidbody2D targetRb = hit.attachedRigidbody;
@@ -77,6 +107,9 @@ public class BoomBox : NetworkBehaviour
                 continue;
 
             if (targetRb == boxRigidbody)
+                continue;
+
+            if (!affectedRigidbodies.Add(targetRb))
                 continue;
 
             Vector2 direction = targetRb.position - (Vector2)transform.position;
@@ -90,7 +123,6 @@ public class BoomBox : NetworkBehaviour
         }
     }
 
-    [Server]
     private void StopBoomBoxPhysics()
     {
         if (boxRigidbody == null)
@@ -103,15 +135,9 @@ public class BoomBox : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcExplode()
+    private void RpcPlayExplosionEffect()
     {
-        if (boxRenderer != null)
-            boxRenderer.enabled = false;
-
-        if (boxCollider != null)
-            boxCollider.enabled = false;
-
-        StopBoomBoxPhysicsClient();
+        ApplyExplodedState();
 
         if (boomEffect == null)
             return;
@@ -119,17 +145,6 @@ public class BoomBox : NetworkBehaviour
         boomEffect.gameObject.SetActive(true);
         boomEffect.Clear(true);
         boomEffect.Play(true);
-    }
-
-    private void StopBoomBoxPhysicsClient()
-    {
-        if (boxRigidbody == null)
-            return;
-
-        boxRigidbody.velocity = Vector2.zero;
-        boxRigidbody.angularVelocity = 0f;
-        boxRigidbody.gravityScale = 0f;
-        boxRigidbody.constraints |= RigidbodyConstraints2D.FreezePosition;
     }
 
     private void OnDrawGizmosSelected()

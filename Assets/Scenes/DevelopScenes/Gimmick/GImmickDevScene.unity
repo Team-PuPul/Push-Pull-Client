@@ -3203,6 +3203,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BoomBox
       objectReference: {fileID: 0}
+    - target: {fileID: 7925532983520983140, guid: 61a31fc49cb2bbc44b4f29ca2f91fdd5, type: 3}
+      propertyPath: explosionForce
+      value: 80
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
