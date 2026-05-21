@@ -1,0 +1,140 @@
+using Mirror;
+using UnityEngine;
+
+public class BoomBox : NetworkBehaviour
+{
+    [Header("References")]
+    [SerializeField]
+    private SpriteRenderer boxRenderer;
+
+    [SerializeField]
+    private Collider2D boxCollider;
+
+    [SerializeField]
+    private Rigidbody2D boxRigidbody;
+
+    [SerializeField]
+    private ParticleSystem boomEffect;
+
+    [Header("Explosion")]
+    [SerializeField]
+    private float explosionRadius = 3f;
+
+    [SerializeField]
+    private float explosionForce = 10f;
+
+    [SerializeField]
+    private LayerMask explosionTargetLayer;
+
+    private bool exploded;
+
+    [ServerCallback]
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        Explode();
+    }
+
+    [ServerCallback]
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!collision.collider.CompareTag("Player"))
+            return;
+
+        Explode();
+    }
+
+    [Server]
+    private void Explode()
+    {
+        if (exploded)
+            return;
+
+        exploded = true;
+
+        ApplyExplosionForce();
+        StopBoomBoxPhysics();
+
+        RpcExplode();
+    }
+
+    [Server]
+    private void ApplyExplosionForce()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
+            transform.position,
+            explosionRadius,
+            explosionTargetLayer
+        );
+
+        foreach (Collider2D hit in hits)
+        {
+            Rigidbody2D targetRb = hit.attachedRigidbody;
+
+            if (targetRb == null)
+                continue;
+
+            if (targetRb == boxRigidbody)
+                continue;
+
+            Vector2 direction = targetRb.position - (Vector2)transform.position;
+
+            if (direction.sqrMagnitude <= 0.0001f)
+                direction = Vector2.up;
+            else
+                direction.Normalize();
+
+            targetRb.AddForce(direction * explosionForce, ForceMode2D.Impulse);
+        }
+    }
+
+    [Server]
+    private void StopBoomBoxPhysics()
+    {
+        if (boxRigidbody == null)
+            return;
+
+        boxRigidbody.velocity = Vector2.zero;
+        boxRigidbody.angularVelocity = 0f;
+        boxRigidbody.gravityScale = 0f;
+        boxRigidbody.constraints |= RigidbodyConstraints2D.FreezePosition;
+    }
+
+    [ClientRpc]
+    private void RpcExplode()
+    {
+        if (boxRenderer != null)
+            boxRenderer.enabled = false;
+
+        if (boxCollider != null)
+            boxCollider.enabled = false;
+
+        StopBoomBoxPhysicsClient();
+
+        if (boomEffect == null)
+            return;
+
+        boomEffect.gameObject.SetActive(true);
+        boomEffect.Clear(true);
+        boomEffect.Play(true);
+    }
+
+    private void StopBoomBoxPhysicsClient()
+    {
+        if (boxRigidbody == null)
+            return;
+
+        boxRigidbody.velocity = Vector2.zero;
+        boxRigidbody.angularVelocity = 0f;
+        boxRigidbody.gravityScale = 0f;
+        boxRigidbody.constraints |= RigidbodyConstraints2D.FreezePosition;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, explosionRadius);
+    }
+}
