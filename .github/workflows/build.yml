@@ -58,6 +58,14 @@ jobs:
           buildsPath: builds
           versioning: Semantic
 
+      - name: Create steam_appid.txt
+        shell: pwsh
+        run: |
+          # 480은 테스트용 ID입니다. 실제 ID가 있다면 수정하세요.
+          $buildPath = "steam_appid.txt"
+          echo "480" > $buildPath
+          Write-Host "Created steam_appid.txt at $buildPath"
+
       - name: Prepare artifact
         run: |
           set -euo pipefail
