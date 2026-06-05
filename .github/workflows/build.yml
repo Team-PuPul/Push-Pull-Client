@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - targetPlatform: StandaloneWindows64
-            buildName: Windows
+            buildName: "Push&Pull"
 
     steps:
       - name: Checkout repository
@@ -58,14 +58,25 @@ jobs:
           buildsPath: builds
           versioning: Semantic
 
-      - name: Zip build output
+      - name: Create steam_appid.txt
+        shell: pwsh
         run: |
-          cd builds
-          zip -r ${{ matrix.buildName }}.zip ${{ matrix.targetPlatform }}
+          # 480은 테스트용 ID입니다. 실제 ID가 있다면 수정하세요.
+          $buildPath = "steam_appid.txt"
+          echo "480" > $buildPath
+          Write-Host "Created steam_appid.txt at $buildPath"
+
+      - name: Prepare artifact
+        run: |
+          set -euo pipefail
+          rm -rf "${RUNNER_TEMP}/artifact"
+          mkdir -p "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}"
+          cp -a "builds/${{ matrix.targetPlatform }}/." "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}/"
+          cp steam_appid.txt "${RUNNER_TEMP}/artifact/${{ matrix.buildName }}/steam_appid.txt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.buildName }}-${{ github.sha }}
-          path: builds/${{ matrix.buildName }}.zip
+          name: ${{ matrix.buildName }}
+          path: ${{ runner.temp }}/artifact
           retention-days: 14
