@@ -57,6 +57,9 @@ public class TurnColorObject : NetworkBehaviour
     private void TurnColorOnServer()
     {
         isWhiteActive = !isWhiteActive;
+
+        ApplyColorState(isWhiteActive);
+
         RpcPlayTurnColorEffect();
     }
 
