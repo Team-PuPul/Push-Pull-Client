@@ -181,7 +181,7 @@ MonoBehaviour:
   boxRigidbody: {fileID: 3006190070146902379}
   boomEffect: {fileID: 1442584078902611988}
   explosionRadius: 3
-  explosionForce: 20
+  explosionForce: 50
   explosionTargetLayer:
     serializedVersion: 2
     m_Bits: 4294967295
