@@ -13,7 +13,7 @@ public class LevelLoader : MonoBehaviour
     [SerializeField]
     private float LoadingTime = 1f;
 
-    public void LoadNextLevel(int SceneIndex)
+    public void LoadNextLevel()
     {
         EventSystem eventSystem = FindObjectOfType<EventSystem>();
         if (eventSystem != null)
