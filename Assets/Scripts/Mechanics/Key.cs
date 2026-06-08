@@ -9,8 +9,10 @@ public class Key : NetworkBehaviour
     [SerializeField]
     private AudioClip clip;
 
-    private void Start()
+    public override void OnStartServer()
     {
+        base.OnStartServer();
+
         counter = FindObjectOfType<KeyCounter>();
     }
 
@@ -20,20 +22,31 @@ public class Key : NetworkBehaviour
         if (collected)
             return;
 
+        if (counter == null)
+            counter = FindObjectOfType<KeyCounter>();
+
+        if (counter == null)
+        {
+            Debug.LogError(
+                $"[Key:{gameObject.name}] KeyCounter를 찾을 수 없어 키 획득을 처리할 수 없습니다. "
+                    + $"isServer={isServer}, isClient={isClient}, netId={netId}"
+            );
+            return;
+        }
+
         collected = true;
-        RpcApplyCollect();
+
+        counter.AddCount();
+
+        RpcPlayCollectSound();
 
         NetworkServer.Destroy(gameObject);
     }
 
     [ClientRpc]
-    private void RpcApplyCollect()
+    private void RpcPlayCollectSound()
     {
-        SoundManager.Instance.SFXPlay("GetKey", clip);
-
-        if (counter == null)
-            counter = FindObjectOfType<KeyCounter>();
-
-        counter.AddCount();
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.SFXPlay("GetKey", clip);
     }
 }
