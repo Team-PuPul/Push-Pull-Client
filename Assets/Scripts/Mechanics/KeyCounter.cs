@@ -1,49 +1,78 @@
 using System;
-using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class KeyCounter : MonoBehaviour
+public class KeyCounter : NetworkBehaviour
 {
     public event Action OnKeyCountChanged;
 
+    [SyncVar(hook = nameof(OnKeyCountSynced))]
+    private int keyCount;
+
+    [SyncVar(hook = nameof(OnMaxCountSynced))]
+    private int maxCount;
+
     [SerializeField]
-    private List<Key> _keys = new List<Key>();
+    private KeyCountUI countUI;
 
-    public int KeyCount { get; private set; } = 0;
-    public int _maxCount = 0;
+    public int KeyCount => keyCount;
+    public int MaxCount => maxCount;
 
-    public KeyCountUI countUI;
+    // 기존 코드 호환용. Door/UI에서 _maxCount를 쓰고 있었다면 당장 안 터지게 둠.
+    public int _maxCount => maxCount;
 
-    private void Awake()
+    public override void OnStartServer()
     {
-        ResetCount();
+        base.OnStartServer();
 
         Key[] currentKeys = FindObjectsOfType<Key>();
-        countUI = FindObjectOfType<KeyCountUI>();
 
-        foreach (var key in currentKeys)
-        {
-            _keys.Add(key);
-        }
-
-        _maxCount = _keys.Count;
+        keyCount = 0;
+        maxCount = currentKeys.Length;
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        CacheUI();
+        UpdateUI();
+    }
+
+    [Server]
     public void AddCount(int amount = 1)
     {
-        if (KeyCount + amount <= _maxCount)
-        {
-            KeyCount += amount;
-            OnKeyCountChanged?.Invoke();
-        }
+        int nextCount = Mathf.Clamp(keyCount + amount, 0, maxCount);
 
-        countUI.SetCountText();
-        Debug.Log(KeyCount);
+        if (keyCount == nextCount)
+            return;
+
+        keyCount = nextCount;
+
+        OnKeyCountChanged?.Invoke();
     }
 
-    public void ResetCount()
+    private void OnKeyCountSynced(int oldValue, int newValue)
     {
-        KeyCount = 0;
-        _maxCount = 0;
+        UpdateUI();
+    }
+
+    private void OnMaxCountSynced(int oldValue, int newValue)
+    {
+        UpdateUI();
+    }
+
+    private void CacheUI()
+    {
+        if (countUI == null)
+            countUI = FindObjectOfType<KeyCountUI>();
+    }
+
+    private void UpdateUI()
+    {
+        CacheUI();
+
+        if (countUI != null)
+            countUI.SetCountText(keyCount, maxCount);
     }
 }

@@ -664,7 +664,7 @@ MonoBehaviour:
   target: {fileID: 5304303244130676089}
   syncPosition: 1
   syncRotation: 1
-  syncScale: 1
+  syncScale: 0
   onlySyncOnChange: 1
   compressRotation: 1
   interpolatePosition: 1
@@ -692,8 +692,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3369c7e0db1c38f4bb121556216c209c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   playerName: 
-  idText: {fileID: 9162365698268519990}
 --- !u!1 &3592784288518633808
 GameObject:
   m_ObjectHideFlags: 0
@@ -1733,6 +1735,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e5b30423f6e16d43bd9b9e3ae5e000e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!1 &7844950273274155998
 GameObject:
   m_ObjectHideFlags: 0
