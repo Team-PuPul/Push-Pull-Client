@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2967698154658458960}
   - component: {fileID: 497040903696951729}
   - component: {fileID: 6143616195593269492}
-  - component: {fileID: 2473349793310216654}
+  - component: {fileID: 3813219092005904307}
   m_Layer: 0
   m_Name: TurnColor 1
   m_TagString: Untagged
@@ -105,12 +105,11 @@ MonoBehaviour:
   whiteTileList:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
   blackTileList:
   - {fileID: 0}
   - {fileID: 0}
   anim: {fileID: 0}
-  clip: {fileID: 0}
+  clip: {fileID: 8300000, guid: 79e6baad2fd414b82a6d49ce1568d2e5, type: 3}
 --- !u!61 &6143616195593269492
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -156,7 +155,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 1}
   m_EdgeRadius: 0
---- !u!114 &2473349793310216654
+--- !u!114 &3813219092005904307
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

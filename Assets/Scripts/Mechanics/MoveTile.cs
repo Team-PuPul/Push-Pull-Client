@@ -1,32 +1,40 @@
 using System.Collections;
+using Mirror;
 using UnityEngine;
 
-public class MoveTile : MonoBehaviour
+public class MoveTile : NetworkBehaviour
 {
-    [SerializeField] Vector3 pos1;
-    [SerializeField] Vector3 pos2;
+    [SerializeField]
+    private Vector3 pos1;
 
-    [SerializeField] float speed;
-    [SerializeField] float waitTime;
+    [SerializeField]
+    private Vector3 pos2;
 
-    Vector3 desPos;
+    [SerializeField]
+    private float speed;
 
+    [SerializeField]
+    private float waitTime;
+
+    private Vector3 desPos;
+
+    [ServerCallback]
     private void Start()
     {
         desPos = pos1;
-        StartCoroutine(Move()) ;
+        StartCoroutine(Move());
     }
 
-    IEnumerator Move()
+    [Server]
+    private IEnumerator Move()
     {
         while (true)
         {
-            transform.localPosition =
-                Vector3.MoveTowards(
-                    transform.localPosition,
-                    desPos,
-                    speed * Time.deltaTime
-                );
+            transform.localPosition = Vector3.MoveTowards(
+                transform.localPosition,
+                desPos,
+                speed * Time.deltaTime
+            );
 
             if (Vector3.Distance(transform.localPosition, desPos) < 0.01f * (speed + 1))
             {
@@ -35,22 +43,6 @@ public class MoveTile : MonoBehaviour
             }
 
             yield return null;
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if(collision.transform.GetComponent<Rigidbody2D>() != null)
-        {
-            collision.transform.parent = transform;
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.transform.GetComponent<Rigidbody2D>() != null)
-        {
-            collision.transform.parent = null;
         }
     }
 }
