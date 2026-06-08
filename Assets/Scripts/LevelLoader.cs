@@ -59,7 +59,21 @@ public class LevelLoader : MonoBehaviour
 
     private void ChangeScene(string sceneName)
     {
-        NetworkManager.singleton.ServerChangeScene(sceneName);
+        if (NetworkManager.singleton != null && NetworkServer.active)
+        {
+            NetworkManager.singleton.ServerChangeScene(sceneName);
+            return;
+        }
+
+        if (NetworkClient.active)
+        {
+            Debug.LogWarning(
+                $"클라이언트에서는 직접 씬을 변경하지 않습니다. sceneName={sceneName}"
+            );
+            return;
+        }
+
+        SceneManager.LoadScene(sceneName);
     }
 
     private string GetSceneNameByBuildIndex(int buildIndex)
