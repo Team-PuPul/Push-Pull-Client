@@ -5,11 +5,61 @@ using UnityEngine;
 
 public class PushPullNetworkManager : NetworkManager
 {
+    [Header("Player Prefabs")]
+    [SerializeField]
+    private GameObject blackPlayerPrefab;
+
+    [Header("Stage Spawn Points")]
     [SerializeField]
     private string whiteSpawnName = "WhiteStartPoint";
 
     [SerializeField]
     private string blackSpawnName = "BlackStartPoint";
+
+    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+    {
+        Transform startPosition = GetStartPosition();
+
+        GameObject selectedPrefab = GetPlayerPrefabForConnection(conn);
+
+        Vector3 spawnPosition = startPosition != null ? startPosition.position : Vector3.zero;
+        Quaternion spawnRotation =
+            startPosition != null ? startPosition.rotation : Quaternion.identity;
+
+        GameObject player = Instantiate(selectedPrefab, spawnPosition, spawnRotation);
+        NetworkServer.AddPlayerForConnection(conn, player);
+
+        Debug.Log(
+            $"[PushPullNetworkManager] Add player. "
+                + $"connectionId={conn.connectionId}, prefab={selectedPrefab.name}"
+        );
+    }
+
+    private GameObject GetPlayerPrefabForConnection(NetworkConnectionToClient conn)
+    {
+        int existingPlayerCount = 0;
+
+        foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
+        {
+            if (connection == null)
+                continue;
+
+            if (connection.identity != null)
+                existingPlayerCount++;
+        }
+
+        if (existingPlayerCount == 0)
+            return playerPrefab;
+
+        if (blackPlayerPrefab != null)
+            return blackPlayerPrefab;
+
+        Debug.LogWarning(
+            "[PushPullNetworkManager] blackPlayerPrefab이 비어있어서 기본 playerPrefab을 사용합니다."
+        );
+
+        return playerPrefab;
+    }
 
     public override void OnServerSceneChanged(string sceneName)
     {
@@ -108,17 +158,14 @@ public class PushPullNetworkManager : NetworkManager
             NetworkTransformBase networkTransform = player.GetComponent<NetworkTransformBase>();
 
             if (networkTransform != null)
-            {
                 networkTransform.ServerTeleport(spawn.position, spawn.rotation);
-            }
             else
-            {
                 player.transform.SetPositionAndRotation(spawn.position, spawn.rotation);
-            }
 
             Debug.Log(
                 $"[PushPullNetworkManager] Move player to spawn. "
-                    + $"connectionId={connection.connectionId}, player={player.name}, spawn={spawn.name}, position={spawn.position}"
+                    + $"connectionId={connection.connectionId}, player={player.name}, "
+                    + $"spawn={spawn.name}, position={spawn.position}"
             );
         }
     }
