@@ -33,7 +33,10 @@ public class LevelLoader : MonoBehaviour
 
     private IEnumerator LoadLevel(int levelIndex)
     {
-        animator.SetTrigger("Start");
+        if (animator != null)
+        {
+            animator.SetTrigger("Start");
+        }
 
         yield return new WaitForSeconds(LoadingTime);
 
@@ -50,8 +53,10 @@ public class LevelLoader : MonoBehaviour
 
     private IEnumerator LoadLevel(string name)
     {
-        animator.SetTrigger("Start");
-
+        if (animator != null)
+        {
+            animator.SetTrigger("Start");
+        }
         yield return new WaitForSeconds(LoadingTime);
 
         ChangeScene(name);
