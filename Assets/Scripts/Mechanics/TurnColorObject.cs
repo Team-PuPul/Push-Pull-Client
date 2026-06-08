@@ -1,74 +1,98 @@
-using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-enum ColorType
+public class TurnColorObject : NetworkBehaviour
 {
-    White,
-    Black
-}
+    [SerializeField]
+    private List<GameObject> whiteTileList = new List<GameObject>();
 
-public class TurnColorObject : MonoBehaviour
-{
-    public List<GameObject> whiteTileList;
-    public List<GameObject> blackTileList;
+    [SerializeField]
+    private List<GameObject> blackTileList = new List<GameObject>();
+
+    [SerializeField]
+    private Animator anim;
+
+    [SerializeField]
+    private AudioClip clip;
 
     private InvertEffect invertEffect;
 
-    public Animator anim;
+    [SyncVar(hook = nameof(OnWhiteActiveChanged))]
+    private bool isWhiteActive = true;
 
-    [SerializeField] AudioClip clip;
-   
-    static ColorType colorType = ColorType.White;
-
-    private void Start()
+    private void Awake()
     {
-        colorType = ColorType.White;
-
         invertEffect = FindObjectOfType<InvertEffect>();
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        isWhiteActive = true;
+        ApplyColorState(isWhiteActive);
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        if (invertEffect == null)
+            invertEffect = FindObjectOfType<InvertEffect>();
+
+        ApplyColorState(isWhiteActive);
+    }
+
+    [ServerCallback]
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!collision.GetComponentInParent<InputPlayer>())
+            return;
+
+        TurnColorOnServer();
+    }
+
+    [Server]
+    private void TurnColorOnServer()
+    {
+        isWhiteActive = !isWhiteActive;
+        RpcPlayTurnColorEffect();
+    }
+
+    private void OnWhiteActiveChanged(bool oldValue, bool newValue)
+    {
+        ApplyColorState(newValue);
+    }
+
+    private void ApplyColorState(bool whiteActive)
+    {
+        for (int i = 0; i < whiteTileList.Count; i++)
+        {
+            if (whiteTileList[i] != null)
+                whiteTileList[i].SetActive(whiteActive);
+        }
 
         for (int i = 0; i < blackTileList.Count; i++)
         {
-            blackTileList[i].SetActive(false);
+            if (blackTileList[i] != null)
+                blackTileList[i].SetActive(!whiteActive);
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    [ClientRpc]
+    private void RpcPlayTurnColorEffect()
     {
-        //if(collision.TryGetComponent<NewPlayer1>(out var _) || collision.TryGetComponent<NewPlayer2>(out var _) || collision.gameObject.layer == 8)
-        //{
-        //    TurnColor();
-        //}
-    }
+        if (invertEffect == null)
+            invertEffect = FindObjectOfType<InvertEffect>();
 
-    void TurnColor()
-    {
-        invertEffect.EffectOn();
-        SoundManager.Instance.SFXPlay("TurnColor",clip);
+        if (invertEffect != null)
+            invertEffect.EffectOn();
 
-        colorType = colorType == ColorType.White ? ColorType.Black : ColorType.White;
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.SFXPlay("TurnColor", clip);
 
-        if (colorType == ColorType.White)
-        {
-            for (int i = 0; i < whiteTileList.Count; i++)
-            {
-                whiteTileList[i].SetActive(true);
-            }
-            for (int i = 0; i < blackTileList.Count; i++)
-            {
-                blackTileList[i].SetActive(false);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < whiteTileList.Count; i++)
-            {
-                whiteTileList[i].SetActive(false);
-            }
-            for (int i = 0; i < blackTileList.Count; i++)
-            {
-                blackTileList[i].SetActive(true);
-            }
-        }
+        if (anim != null)
+            anim.SetTrigger("Turn");
     }
 }

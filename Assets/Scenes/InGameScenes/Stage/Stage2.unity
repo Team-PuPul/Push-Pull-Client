@@ -131,14 +131,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
-      propertyPath: clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 79e6baad2fd414b82a6d49ce1568d2e5, type: 3}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
-      propertyPath: whiteTileList.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
       propertyPath: blackTileList.Array.data[0]
       value: 
       objectReference: {fileID: 1702850997}
@@ -154,17 +146,17 @@ PrefabInstance:
       propertyPath: whiteTileList.Array.data[1]
       value: 
       objectReference: {fileID: 613560104}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
-      propertyPath: whiteTileList.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 1972179575338701998, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
       propertyPath: m_Name
       value: TurnColor (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 3813219092005904307, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+      propertyPath: sceneId
+      value: 2950585039
+      objectReference: {fileID: 0}
     - target: {fileID: 4266920830021726155, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 24.484009
+      value: 23.65
       objectReference: {fileID: 0}
     - target: {fileID: 4266920830021726155, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2095,6 +2087,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd94320b68c37794998965bab40723a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pos1: {x: 0, y: -1, z: 0}
   pos2: {x: 0, y: 3, z: 0}
   speed: 3
