@@ -26,7 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InGameScenes/Stage/Stage1.unity
     guid: 61bf6c6cab18587469c4c60ec34979b8
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/InGameScenes/Stage/Stage2.unity
     guid: cab474f8694737f40b899e7ab69f3cfd
   - enabled: 0
