@@ -29,7 +29,7 @@ public class InputPlayer : NetworkBehaviour
     private bool moveLeft = false;
     private bool moveRight = false;
     private bool moving = false;
-    public float moveSpeed = 4f;
+    private float moveSpeed = 4f;
 
     [SerializeField]
     private bool flip;
@@ -40,8 +40,8 @@ public class InputPlayer : NetworkBehaviour
     public bool jumpAble = true;
 
     [Header("Push / Charge")]
-    public float MaxPushCharge = 35f;
-    public float ChargeTime = 1f;
+    private float MaxPushCharge = 35f;
+    private float ChargeTime = 1f;
     public float PushCharge = 0f;
     private bool isCharging = false;
     public bool Push = false;
@@ -50,13 +50,13 @@ public class InputPlayer : NetworkBehaviour
     public bool GrabHeld { get; private set; } = false;
 
     [Header("Grab / Pull")]
-    public float RotSpeed = 1f;
-    public float maxAngle = 20f;
+    private float RotSpeed = 1f;
+    private float maxAngle = 35f;
     private float RPressTime = 0f;
     private float aimSmooth = 8f;
     private bool isGrabHolding = false;
     private Vector2 grabControlInput = Vector2.zero;
-    public float grabDeadzone = 0.15f;
+    private float grabDeadzone = 0.15f;
 
     public string ControlScheme = "Keyboard, Mouse";
 
@@ -69,6 +69,11 @@ public class InputPlayer : NetworkBehaviour
     private string syncAnimName = "";
 
     private bool clearedStarted = false;
+
+    [Header("Moving Surface")]
+    [SerializeField]
+    private float againstPlatformBoost = 0.5f;
+
     private IMovingSurface currentMovingSurface;
     private Vector3 lastMovingSurfacePosition;
 
@@ -177,17 +182,11 @@ public class InputPlayer : NetworkBehaviour
             transform.Translate(move);
         }
 
-        //if (moving)
-        //{
-        //    Vector2 moveDelta = new Vector2(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f);
-        //    rb.MovePosition(rb.position + moveDelta);
-        //}
-
         if (Mathf.Abs(moveInput.x) > flipThreshold && GrabGlove != null && !GrabGlove.grabing)
         {
-            if (moveInput.x > 0f && flip)
+            if (moveInput.x > 0f && !flip)
                 Flip();
-            else if (moveInput.x < 0f && !flip)
+            else if (moveInput.x < 0f && flip)
                 Flip();
         }
     }
@@ -224,8 +223,24 @@ public class InputPlayer : NetworkBehaviour
         Vector3 surfacePosition = currentMovingSurface.CarryPosition;
         Vector3 surfaceDelta = surfacePosition - lastMovingSurfacePosition;
 
-        if (surfaceDelta != Vector3.zero)
-            transform.position += surfaceDelta;
+        Vector3 extraMove = Vector3.zero;
+
+        if (Mathf.Abs(moveInput.x) > 0.01f && Mathf.Abs(surfaceDelta.x) > 0.0001f)
+        {
+            bool movingAgainstPlatform = Mathf.Sign(moveInput.x) != Mathf.Sign(surfaceDelta.x);
+
+            if (movingAgainstPlatform)
+            {
+                extraMove.x = moveInput.x * Mathf.Abs(surfaceDelta.x) * againstPlatformBoost;
+            }
+        }
+
+        Vector3 carryDelta = surfaceDelta + extraMove;
+
+        if (carryDelta != Vector3.zero)
+        {
+            transform.position += carryDelta;
+        }
 
         lastMovingSurfacePosition = surfacePosition;
     }
@@ -284,10 +299,6 @@ public class InputPlayer : NetworkBehaviour
         return false;
     }
 
-    // ───────────────────────────────────────────
-    // 애니메이션 동기화
-    // ───────────────────────────────────────────
-
     private void OnAnimChanged(string oldVal, string newVal)
     {
         if (isLocalPlayer)
@@ -319,10 +330,6 @@ public class InputPlayer : NetworkBehaviour
         syncAnimName = animName;
     }
 
-    // ───────────────────────────────────────────
-    // 플립 동기화
-    // ───────────────────────────────────────────
-
     private void OnFlipChanged(bool oldVal, bool newVal)
     {
         if (isLocalPlayer)
@@ -343,10 +350,6 @@ public class InputPlayer : NetworkBehaviour
         syncFlip = isFlipped;
     }
 
-    // ───────────────────────────────────────────
-    // 밀치기 장갑 펀치 애니메이션 동기화
-    // ───────────────────────────────────────────
-
     public void SyncPunchAnim()
     {
         CmdPunchAnim();
@@ -366,10 +369,6 @@ public class InputPlayer : NetworkBehaviour
         PushGlove?.DoPunchAnim();
     }
 
-    // ───────────────────────────────────────────
-    // 상대 플레이어 끌기
-    // ───────────────────────────────────────────
-
     public void SyncMoveTarget(uint targetNetId, Vector3 targetPos)
     {
         if (isLocalPlayer)
@@ -388,10 +387,6 @@ public class InputPlayer : NetworkBehaviour
         if (NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
             identity.transform.position = targetPos;
     }
-
-    // ───────────────────────────────────────────
-    // 밀치기
-    // ───────────────────────────────────────────
 
     public void SyncApplyPush(uint targetNetId, Vector2 dir, float power)
     {
@@ -417,10 +412,6 @@ public class InputPlayer : NetworkBehaviour
         Vector2 impulseVector = dir * power + Vector2.up * power / 2f;
         rigid.AddForce(impulseVector, ForceMode2D.Impulse);
     }
-
-    // ───────────────────────────────────────────
-    // 입력 처리
-    // ───────────────────────────────────────────
 
     public void OnMoveLeft(InputAction.CallbackContext context)
     {
@@ -508,7 +499,6 @@ public class InputPlayer : NetworkBehaviour
         {
             GrabHeld = true;
 
-            // 그랩이 이미 돌아와 있으면 바로 회전 가능
             if (GrabGlove != null && !GrabGlove.grabing)
             {
                 isGrabHolding = true;
@@ -538,10 +528,6 @@ public class InputPlayer : NetworkBehaviour
         grabControlInput = context.ReadValue<Vector2>();
     }
 
-    // ───────────────────────────────────────────
-    // Grab 회전
-    // ───────────────────────────────────────────
-
     private void UpdateGrabRotation()
     {
         if (GrabObject == null)
@@ -553,9 +539,10 @@ public class InputPlayer : NetworkBehaviour
 
         if (isKeyboard)
         {
-            var mouse = Mouse.current;
             Camera cam = Camera.main;
-            if (mouse != null && cam != null)
+            Mouse mouse = Mouse.current;
+
+            if (cam != null && mouse != null)
             {
                 Vector2 screenPos = mouse.position.ReadValue();
                 Vector3 world = cam.ScreenToWorldPoint(
@@ -567,50 +554,63 @@ public class InputPlayer : NetworkBehaviour
 
                 if (dirWorld.sqrMagnitude > 0.0001f)
                 {
-                    float facingSign = flip ? -1f : 1f;
+                    float facingSign = flip ? 1f : -1f;
                     float adjustedX = dirWorld.x * facingSign;
 
-                    float desiredLocal = Mathf.Atan2(dirWorld.y, adjustedX) * Mathf.Rad2Deg;
+                    float desiredLocal = Mathf.Atan2(-dirWorld.y, adjustedX) * Mathf.Rad2Deg;
+
                     desiredLocal = Mathf.Clamp(
                         desiredLocal,
                         -Mathf.Abs(maxAngle),
                         Mathf.Abs(maxAngle)
                     );
+
                     float currentLocalZ = GrabObject.localEulerAngles.z;
                     float smoothLocalZ = Mathf.LerpAngle(
                         currentLocalZ,
                         desiredLocal,
                         Time.deltaTime * aimSmooth
                     );
+
                     GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
                 }
                 else
+                {
                     ApplyOscillationIfNeeded();
+                }
             }
             else
+            {
                 ApplyOscillationIfNeeded();
+            }
         }
         else
         {
             Vector2 stick = grabControlInput;
+
             if (stick.magnitude >= grabDeadzone)
             {
-                float rawAngle = Mathf.Atan2(stick.y, stick.x) * Mathf.Rad2Deg;
+                float rawAngle = Mathf.Atan2(-stick.y, -stick.x) * Mathf.Rad2Deg;
+
                 float desiredLocal = Mathf.Clamp(
                     rawAngle,
                     -Mathf.Abs(maxAngle),
                     Mathf.Abs(maxAngle)
                 );
+
                 float currentLocalZ = GrabObject.localEulerAngles.z;
                 float smoothLocalZ = Mathf.LerpAngle(
                     currentLocalZ,
                     desiredLocal,
                     Time.deltaTime * aimSmooth
                 );
+
                 GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
             }
             else
+            {
                 ApplyOscillationIfNeeded();
+            }
         }
     }
 
@@ -634,10 +634,6 @@ public class InputPlayer : NetworkBehaviour
             GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
         }
     }
-
-    // ───────────────────────────────────────────
-    // 유틸
-    // ───────────────────────────────────────────
 
     public void Flip()
     {
