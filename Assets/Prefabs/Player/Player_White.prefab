@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 6078295900494022155}
   m_Layer: 0
   m_Name: GrabGlove
-  m_TagString: Player1Grab
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -610,7 +610,7 @@ GameObject:
   - component: {fileID: 5468032556344355731}
   m_Layer: 0
   m_Name: GroundChecker
-  m_TagString: Player1
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -820,7 +820,7 @@ GameObject:
   - component: {fileID: 8100897380965880271}
   m_Layer: 0
   m_Name: PushGlove
-  m_TagString: Player1Glove
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
