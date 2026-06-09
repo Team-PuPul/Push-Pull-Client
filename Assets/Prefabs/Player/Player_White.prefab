@@ -94,6 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4752330262061123021}
   - component: {fileID: 5002699378007351652}
+  - component: {fileID: 152978783769613019}
   m_Layer: 0
   m_Name: Eye
   m_TagString: Untagged
@@ -110,9 +111,9 @@ Transform:
   m_GameObject: {fileID: 693877946824366966}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.086666755, y: 0.122, z: 0}
-  m_LocalScale: {x: 0.86666673, y: 0.86666673, z: 0.86666673}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -0.08, y: 0.122, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 8904040744203323821}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -156,7 +157,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 948870839
   m_SortingLayer: 4
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_Sprite: {fileID: -1768484962, guid: e1f1aedb2b6d1cc47ab312621def8654, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -168,6 +169,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &152978783769613019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 693877946824366966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8000809f7b1ae414b8cbd85ae4f6856a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  leftX: 0.1
+  rightX: -0.2
+  downY: -0.05
+  upY: 0.28
+  playerRoot: {fileID: 8904040744203323821}
+  sendInterval: 0.05
+  moveSmooth: 20
 --- !u!1 &2405035960124505732
 GameObject:
   m_ObjectHideFlags: 0
@@ -1447,8 +1470,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -7.2557764, y: 0.39296708, z: 0}
-  m_LocalScale: {x: -1.4999999, y: 1.4999999, z: 1.4999999}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 1.5, y: 1.4999999, z: 1.4999999}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5013414860878518717}
   - {fileID: 8605380834207840395}

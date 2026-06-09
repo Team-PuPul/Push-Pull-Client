@@ -723,6 +723,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2831627988086046163}
   - component: {fileID: 5247947863567610570}
+  - component: {fileID: 6308852836907258920}
   m_Layer: 0
   m_Name: Eye
   m_TagString: Untagged
@@ -740,8 +741,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.086666755, y: 0.122, z: 0}
-  m_LocalScale: {x: 0.86666673, y: 0.86666673, z: 0.86666673}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1792118588426108002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -785,7 +786,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 948870839
   m_SortingLayer: 4
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_Sprite: {fileID: -1269213008, guid: 325ef8db95479b04c851235ddaf28a46, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -797,6 +798,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6308852836907258920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5445377091935462173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8000809f7b1ae414b8cbd85ae4f6856a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  leftX: 0.1
+  rightX: -0.2
+  downY: -0.05
+  upY: 0.28
+  playerRoot: {fileID: 0}
+  sendInterval: 0.05
+  moveSmooth: 20
 --- !u!1 &6165446495560273816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,8 +1099,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.9387345, y: 0.547807, z: 0}
-  m_LocalScale: {x: -1.4999999, y: 1.4999999, z: 1.4999999}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 1.5, y: 1.4999999, z: 1.4999999}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4041518554386655656}
   - {fileID: 1336067829918020821}
