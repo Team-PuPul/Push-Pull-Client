@@ -185,9 +185,9 @@ public class InputPlayer : NetworkBehaviour
 
         if (Mathf.Abs(moveInput.x) > flipThreshold && GrabGlove != null && !GrabGlove.grabing)
         {
-            if (moveInput.x > 0f && flip)
+            if (moveInput.x > 0f && !flip)
                 Flip();
-            else if (moveInput.x < 0f && !flip)
+            else if (moveInput.x < 0f && flip)
                 Flip();
         }
     }
@@ -553,9 +553,10 @@ public class InputPlayer : NetworkBehaviour
 
         if (isKeyboard)
         {
-            var mouse = Mouse.current;
             Camera cam = Camera.main;
-            if (mouse != null && cam != null)
+            Mouse mouse = Mouse.current;
+
+            if (cam != null && mouse != null)
             {
                 Vector2 screenPos = mouse.position.ReadValue();
                 Vector3 world = cam.ScreenToWorldPoint(
@@ -567,50 +568,63 @@ public class InputPlayer : NetworkBehaviour
 
                 if (dirWorld.sqrMagnitude > 0.0001f)
                 {
-                    float facingSign = flip ? -1f : 1f;
+                    float facingSign = flip ? 1f : -1f;
                     float adjustedX = dirWorld.x * facingSign;
 
-                    float desiredLocal = Mathf.Atan2(dirWorld.y, adjustedX) * Mathf.Rad2Deg;
+                    float desiredLocal = Mathf.Atan2(-dirWorld.y, adjustedX) * Mathf.Rad2Deg;
+
                     desiredLocal = Mathf.Clamp(
                         desiredLocal,
                         -Mathf.Abs(maxAngle),
                         Mathf.Abs(maxAngle)
                     );
+
                     float currentLocalZ = GrabObject.localEulerAngles.z;
                     float smoothLocalZ = Mathf.LerpAngle(
                         currentLocalZ,
                         desiredLocal,
                         Time.deltaTime * aimSmooth
                     );
+
                     GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
                 }
                 else
+                {
                     ApplyOscillationIfNeeded();
+                }
             }
             else
+            {
                 ApplyOscillationIfNeeded();
+            }
         }
         else
         {
             Vector2 stick = grabControlInput;
+
             if (stick.magnitude >= grabDeadzone)
             {
-                float rawAngle = Mathf.Atan2(stick.y, stick.x) * Mathf.Rad2Deg;
+                float rawAngle = Mathf.Atan2(-stick.y, -stick.x) * Mathf.Rad2Deg;
+
                 float desiredLocal = Mathf.Clamp(
                     rawAngle,
                     -Mathf.Abs(maxAngle),
                     Mathf.Abs(maxAngle)
                 );
+
                 float currentLocalZ = GrabObject.localEulerAngles.z;
                 float smoothLocalZ = Mathf.LerpAngle(
                     currentLocalZ,
                     desiredLocal,
                     Time.deltaTime * aimSmooth
                 );
+
                 GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
             }
             else
+            {
                 ApplyOscillationIfNeeded();
+            }
         }
     }
 

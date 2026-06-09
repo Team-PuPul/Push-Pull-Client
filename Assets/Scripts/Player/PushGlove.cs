@@ -10,10 +10,13 @@ public class PushGlove : MonoBehaviour
         get => _PushPower;
         set => _PushPower = value;
     }
-    [SerializeField] private float _PushPower;
+
+    [SerializeField]
+    private float _PushPower;
     public bool _canPush = true;
 
-    [SerializeField] private Vector3 startLocalPos;
+    [SerializeField]
+    private Vector3 startLocalPos;
     private bool isAnimating = false;
 
     private void Awake()
@@ -27,18 +30,26 @@ public class PushGlove : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (!player.isLocalPlayer) return;
-        if (!_canPush) return;
-        if (!player.Push) return;
+        if (!player.isLocalPlayer)
+            return;
+        if (!_canPush)
+            return;
+        if (!player.Push)
+            return;
 
-        if (collision.gameObject.CompareTag("interactive") || collision.gameObject.CompareTag("Player"))
+        if (
+            collision.gameObject.CompareTag("interactive")
+            || collision.gameObject.CompareTag("Player")
+        )
         {
             Rigidbody2D rigid = collision.attachedRigidbody;
-            if (rigid == null) return;
+            if (rigid == null)
+                return;
 
-            Vector2 dir = (player.gameObject.transform.position.x < collision.gameObject.transform.position.x)
-                ? Vector2.right
-                : Vector2.left;
+            Vector2 dir =
+                (player.gameObject.transform.position.x < collision.gameObject.transform.position.x)
+                    ? Vector2.right
+                    : Vector2.left;
 
             var targetIdentity = collision.gameObject.GetComponent<Mirror.NetworkIdentity>();
 
@@ -71,7 +82,7 @@ public class PushGlove : MonoBehaviour
     {
         isAnimating = true;
 
-        Vector3 targetLocalPos = startLocalPos + new Vector3(1.03f, 0f, 0f);
+        Vector3 targetLocalPos = startLocalPos + new Vector3(-1.03f, 0f, 0f);
         float duration = 0.17f;
         float elapsed = 0f;
 
@@ -79,7 +90,11 @@ public class PushGlove : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.localPosition = Vector3.Lerp(startLocalPos, targetLocalPos, elapsed / duration);
+            transform.localPosition = Vector3.Lerp(
+                startLocalPos,
+                targetLocalPos,
+                elapsed / duration
+            );
             yield return null;
         }
         transform.localPosition = targetLocalPos;
@@ -90,7 +105,11 @@ public class PushGlove : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.localPosition = Vector3.Lerp(targetLocalPos, startLocalPos, elapsed / duration);
+            transform.localPosition = Vector3.Lerp(
+                targetLocalPos,
+                startLocalPos,
+                elapsed / duration
+            );
             yield return null;
         }
         transform.localPosition = startLocalPos;
