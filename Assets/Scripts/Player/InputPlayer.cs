@@ -216,7 +216,10 @@ public class InputPlayer : NetworkBehaviour
         }
 
         if (!currentMovingSurface.CanCarryPlayer)
+        {
+            currentMovingSurface = null;
             return;
+        }
 
         Vector3 surfacePosition = currentMovingSurface.CarryPosition;
         Vector3 surfaceDelta = surfacePosition - lastMovingSurfacePosition;
@@ -232,11 +235,16 @@ public class InputPlayer : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        if (!IsGroundContact(collision))
-            return;
-
         if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
             return;
+
+        if (!IsGroundContact(collision))
+        {
+            if (ReferenceEquals(currentMovingSurface, movingSurface))
+                currentMovingSurface = null;
+
+            return;
+        }
 
         if (ReferenceEquals(currentMovingSurface, movingSurface))
             return;
