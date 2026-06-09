@@ -69,6 +69,8 @@ public class InputPlayer : NetworkBehaviour
     private string syncAnimName = "";
 
     private bool clearedStarted = false;
+    private IMovingSurface currentMovingSurface;
+    private Vector3 lastMovingSurfacePosition;
 
     void Awake()
     {
@@ -171,7 +173,7 @@ public class InputPlayer : NetworkBehaviour
 
         if (moving)
         {
-            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.deltaTime, 0f, 0f);
+            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f, 0f);
             transform.Translate(move);
         }
 
@@ -188,6 +190,90 @@ public class InputPlayer : NetworkBehaviour
             else if (moveInput.x < 0f && !flip)
                 Flip();
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (!isLocalPlayer)
+            return;
+        if (Time.timeScale == 0f)
+            return;
+        if (cantMove)
+            return;
+
+        ApplyMovingSurfaceCarry();
+    }
+
+    private void ApplyMovingSurfaceCarry()
+    {
+        if (currentMovingSurface == null)
+            return;
+
+        if (currentMovingSurface is Object surfaceObject && surfaceObject == null)
+        {
+            currentMovingSurface = null;
+            return;
+        }
+
+        if (!currentMovingSurface.CanCarryPlayer)
+            return;
+
+        Vector3 surfacePosition = currentMovingSurface.CarryPosition;
+        Vector3 surfaceDelta = surfacePosition - lastMovingSurfacePosition;
+
+        if (surfaceDelta != Vector3.zero)
+            transform.position += surfaceDelta;
+
+        lastMovingSurfacePosition = surfacePosition;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (!IsGroundContact(collision))
+            return;
+
+        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
+            return;
+
+        if (ReferenceEquals(currentMovingSurface, movingSurface))
+            return;
+
+        currentMovingSurface = movingSurface;
+        lastMovingSurfacePosition = movingSurface.CarryPosition;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
+            return;
+
+        if (ReferenceEquals(currentMovingSurface, movingSurface))
+            currentMovingSurface = null;
+    }
+
+    private bool TryGetMovingSurface(Collision2D collision, out IMovingSurface movingSurface)
+    {
+        movingSurface = collision.collider.GetComponentInParent<IMovingSurface>();
+        return movingSurface != null && movingSurface.CanCarryPlayer;
+    }
+
+    private bool IsGroundContact(Collision2D collision)
+    {
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            ContactPoint2D contact = collision.GetContact(i);
+
+            if (contact.normal.y > 0.5f)
+                return true;
+        }
+
+        return false;
     }
 
     // ───────────────────────────────────────────
