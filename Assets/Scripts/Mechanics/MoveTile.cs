@@ -2,7 +2,7 @@ using System.Collections;
 using Mirror;
 using UnityEngine;
 
-public class MoveTile : NetworkBehaviour
+public class MoveTile : NetworkBehaviour, IMovingSurface
 {
     [SerializeField]
     private Vector3 pos1;
@@ -17,6 +17,9 @@ public class MoveTile : NetworkBehaviour
     private float waitTime;
 
     private Vector3 desPos;
+
+    public bool CanCarryPlayer => true;
+    public Vector3 CarryPosition => transform.position;
 
     [ServerCallback]
     private void Start()
