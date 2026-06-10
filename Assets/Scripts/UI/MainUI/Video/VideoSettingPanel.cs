@@ -76,14 +76,14 @@ public class VideoSettingPanel : ButtonPanel
     // 해상도 목록에서 이전 항목으로 이동
     public void MoveScreenListLeft()
     {
-        resolutionNum = Mathf.Clamp(resolutionNum - 1, 0, resolutions.Count - 1);
+        resolutionNum = (resolutionNum - 1 + resolutions.Count) % resolutions.Count;
         UpdateScreenText();
     }
 
     // 해상도 목록에서 다음 항목으로 이동
     public void MoveScreenListRight()
     {
-        resolutionNum = Mathf.Clamp(resolutionNum + 1, 0, resolutions.Count - 1);
+        resolutionNum = (resolutionNum + 1) % resolutions.Count;
         UpdateScreenText();
     }
 
