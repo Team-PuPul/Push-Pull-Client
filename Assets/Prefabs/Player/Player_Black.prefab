@@ -1017,7 +1017,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.1, y: 0.3042736}
+  m_Size: {x: 0.1, y: 0.1843456}
   m_EdgeRadius: 0
 --- !u!114 &3985486370921243989
 MonoBehaviour:
@@ -1076,9 +1076,6 @@ GameObject:
   - component: {fileID: 1435549951444036733}
   - component: {fileID: 7133498735121826889}
   - component: {fileID: 8355621858606067336}
-  - component: {fileID: 8064207539509494655}
-  - component: {fileID: 2403865050504401995}
-  - component: {fileID: 6238076262060068505}
   - component: {fileID: 111358731517727899}
   - component: {fileID: 7232404890156327993}
   - component: {fileID: 7045513754272109953}
@@ -1262,69 +1259,6 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
---- !u!114 &8064207539509494655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732084735840748015}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 1
-  syncMode: 0
-  syncInterval: 0
-  clientAuthority: 0
-  animator: {fileID: 6679374193671975080}
---- !u!114 &2403865050504401995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732084735840748015}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 1
-  syncMode: 0
-  syncInterval: 0
-  target: {fileID: 1792118588426108002}
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  onlySyncOnChange: 1
-  compressRotation: 1
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 1
-  coordinateSpace: 0
-  timelineOffset: 1
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
-  onlySyncOnChangeCorrectionMultiplier: 2
-  useFixedUpdate: 0
-  rotationSensitivity: 0.01
-  positionPrecision: 0.01
-  scalePrecision: 0.01
---- !u!114 &6238076262060068505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732084735840748015}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e154110ee543fb478491d35570f1452, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &111358731517727899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1490,19 +1424,15 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   - {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   - {fileID: 8300000, guid: 5039414d94a6e4e70a5ab9e8833e992a, type: 3}
-  moveSpeed: 4
   flip: 0
   flipThreshold: 0.2
   cantMove: 0
   jumpAble: 1
-  MaxPushCharge: 35
-  ChargeTime: 1
   PushCharge: 0
   Push: 0
-  RotSpeed: 1
-  maxAngle: 20
-  grabDeadzone: 0.15
   ControlScheme: Keyboard, Mouse
+  verticalAnimDeadZone: 0.15
+  againstPlatformBoost: 0.5
 --- !u!114 &7045513754272109953
 MonoBehaviour:
   m_ObjectHideFlags: 0
