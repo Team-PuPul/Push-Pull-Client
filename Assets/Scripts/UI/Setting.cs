@@ -19,30 +19,6 @@ public class Setting : MonoBehaviour
 	[SerializeField]
 	private int resolutionNum;
 
-	private void OnEnable()
-	{
-		resolutions.Clear();
-		for(int i =0; i < Screen.resolutions.Length; i++)
-		{
-			if (Screen.resolutions[i].refreshRateRatio.value >= 30 && (Screen.resolutions[i].width * 9 == Screen.resolutions[i].height * 16) && Screen.resolutions[i].width >= 1280)
-			{
-				resolutions.Add(Screen.resolutions[i]);
-			}
-		}
-		resolutionNum = resolutions.Count-1;
-		isFullScreen.isOn = Screen.fullScreen;
-		for (int i = 0; i < resolutions.Count; i++)
-		{
-			if (resolutions[i].width == Screen.width &&
-				resolutions[i].height == Screen.height &&
-				Mathf.Approximately((float)resolutions[i].refreshRateRatio.value, (float)Screen.currentResolution.refreshRateRatio.value))
-			{
-				resolutionNum = i;
-				break;
-			}
-		}
-		UpdateScreenText();
-	}
 	private void UpdateScreenText()
 	{
 		text.text = $"{resolutions[resolutionNum].width} x {resolutions[resolutionNum].height} {(int)resolutions[resolutionNum].refreshRateRatio.value}hz";
