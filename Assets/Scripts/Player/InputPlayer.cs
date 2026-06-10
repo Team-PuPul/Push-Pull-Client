@@ -76,8 +76,6 @@ public class InputPlayer : NetworkBehaviour
     [SerializeField]
     private float groundRecheckDelay = 0.08f;
 
-    private float lastYPosition;
-    private bool hasLastYPosition;
     private bool hasStartedFalling;
     private bool isGrounded = true;
     private float ignoreGroundUntilTime;
@@ -340,8 +338,6 @@ public class InputPlayer : NetworkBehaviour
 
     private void ResetVerticalAnimationTracker()
     {
-        lastYPosition = transform.position.y;
-        hasLastYPosition = true;
         hasStartedFalling = false;
     }
 
