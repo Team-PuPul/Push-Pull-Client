@@ -111,12 +111,18 @@ public class InputPlayer : NetworkBehaviour
     private IMovingSurface currentMovingSurface;
     private Vector3 lastMovingSurfacePosition;
 
-    void Awake()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
 
         if (Anim == null)
             Anim = GetComponent<Animator>();
+
+        if (PlayerInput != null)
+        {
+            PlayerInput.DeactivateInput();
+            PlayerInput.enabled = false;
+        }
 
         ResetVerticalAnimationTracker();
     }
@@ -124,7 +130,13 @@ public class InputPlayer : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         if (PlayerInput != null)
+        {
             PlayerInput.enabled = true;
+            PlayerInput.ActivateInput();
+
+            if (!string.IsNullOrEmpty(PlayerInput.currentControlScheme))
+                ControlScheme = PlayerInput.currentControlScheme;
+        }
 
         if (rb != null)
             rb.isKinematic = false;
@@ -134,6 +146,10 @@ public class InputPlayer : NetworkBehaviour
             cameraFollow.SetTarget(transform);
 
         ResetVerticalAnimationTracker();
+
+        Debug.Log(
+            $"[InputPlayer] Local player started. name={name}, netId={netId}, isLocalPlayer={isLocalPlayer}"
+        );
     }
 
     public override void OnStartClient()
@@ -143,22 +159,33 @@ public class InputPlayer : NetworkBehaviour
         if (!isLocalPlayer)
         {
             if (PlayerInput != null)
+            {
+                PlayerInput.DeactivateInput();
                 PlayerInput.enabled = false;
+            }
 
             ApplyLocomotionAnimatorState(syncIsMoving, syncIsJumping, syncIsFalling);
             SetAnimatorBool(IsDeadHash, syncIsDead);
         }
+
+        Debug.Log(
+            $"[InputPlayer] Client player started. name={name}, netId={netId}, isLocalPlayer={isLocalPlayer}"
+        );
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        if (PlayerInput != null)
+        if (
+            PlayerInput != null
+            && PlayerInput.enabled
+            && !string.IsNullOrEmpty(PlayerInput.currentControlScheme)
+        )
             ControlScheme = PlayerInput.currentControlScheme;
 
         ResetVerticalAnimationTracker();
     }
 
-    void Update()
+    private void Update()
     {
         if (!isLocalPlayer)
             return;
@@ -179,7 +206,11 @@ public class InputPlayer : NetworkBehaviour
         else
             UI.OffGrab();
 
-        if (PlayerInput != null)
+        if (
+            PlayerInput != null
+            && PlayerInput.enabled
+            && !string.IsNullOrEmpty(PlayerInput.currentControlScheme)
+        )
             ControlScheme = PlayerInput.currentControlScheme;
 
         if (isCharging)
@@ -204,7 +235,7 @@ public class InputPlayer : NetworkBehaviour
             UpdateGrabRotation();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (!isLocalPlayer)
             return;
