@@ -65,7 +65,6 @@ public class BoomBox : NetworkBehaviour
         ApplyExplosionForce();
 
         exploded = true;
-
         RpcPlayExplosionEffect();
     }
 
@@ -119,8 +118,75 @@ public class BoomBox : NetworkBehaviour
             else
                 direction.Normalize();
 
-            targetRb.AddForce(direction * explosionForce, ForceMode2D.Impulse);
+            if (TryGetPlayerIdentity(targetRb, out NetworkIdentity playerIdentity))
+            {
+                TargetApplyExplosionForce(
+                    playerIdentity.connectionToClient,
+                    playerIdentity.netId,
+                    direction,
+                    explosionForce
+                );
+            }
+            else
+            {
+                targetRb.AddForce(direction * explosionForce, ForceMode2D.Impulse);
+            }
         }
+    }
+
+    [Server]
+    private bool TryGetPlayerIdentity(Rigidbody2D targetRb, out NetworkIdentity playerIdentity)
+    {
+        playerIdentity = null;
+
+        if (targetRb == null)
+            return false;
+
+        if (!targetRb.CompareTag("Player"))
+            return false;
+
+        playerIdentity = targetRb.GetComponent<NetworkIdentity>();
+
+        if (playerIdentity == null)
+            playerIdentity = targetRb.GetComponentInParent<NetworkIdentity>();
+
+        if (playerIdentity == null)
+            return false;
+
+        if (playerIdentity.connectionToClient == null)
+        {
+            Debug.LogWarning(
+                $"[BoomBox] Player connection is null. "
+                    + $"player={playerIdentity.name}, netId={playerIdentity.netId}, "
+                    + $"isServer={NetworkServer.active}"
+            );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    [TargetRpc]
+    private void TargetApplyExplosionForce(
+        NetworkConnectionToClient target,
+        uint targetNetId,
+        Vector2 direction,
+        float force
+    )
+    {
+        if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
+            return;
+
+        if (!identity.isLocalPlayer)
+            return;
+
+        Rigidbody2D targetRb = identity.GetComponent<Rigidbody2D>();
+
+        if (targetRb == null)
+            return;
+
+        targetRb.AddForce(direction * force, ForceMode2D.Impulse);
     }
 
     private void StopBoomBoxPhysics()
