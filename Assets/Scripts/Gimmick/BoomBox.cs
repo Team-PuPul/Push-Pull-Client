@@ -142,15 +142,12 @@ public class BoomBox : NetworkBehaviour
         if (targetRb == null)
             return false;
 
-        if (!targetRb.CompareTag("Player"))
+        playerIdentity = targetRb.GetComponentInParent<NetworkIdentity>();
+
+        if (playerIdentity == null)
             return false;
 
-        playerIdentity = targetRb.GetComponent<NetworkIdentity>();
-
-        if (playerIdentity == null)
-            playerIdentity = targetRb.GetComponentInParent<NetworkIdentity>();
-
-        if (playerIdentity == null)
+        if (!playerIdentity.CompareTag("Player"))
             return false;
 
         if (playerIdentity.connectionToClient == null)
