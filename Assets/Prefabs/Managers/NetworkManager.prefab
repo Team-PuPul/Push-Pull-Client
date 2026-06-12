@@ -88,10 +88,11 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7256012623865335736, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+  playerPrefab: {fileID: 6441614388983903939, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 7732084735840748015, guid: 328a3ba6ef8066a4ea7ffdf1d1ffe53f, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -107,6 +108,6 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
-  blackPlayerPrefab: {fileID: 7256012623865335736, guid: 471eff94f876fb84386ba91d8fa379cd, type: 3}
+  blackPlayerPrefab: {fileID: 7732084735840748015, guid: 328a3ba6ef8066a4ea7ffdf1d1ffe53f, type: 3}
   whiteSpawnName: WhiteStartPoint
   blackSpawnName: BlackStartPoint
