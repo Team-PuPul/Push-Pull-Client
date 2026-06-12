@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseUI: {fileID: 3095048811830086745, guid: cb4177610bd727741acf265082ec5faf, type: 3}
+  bs: {fileID: 0}
