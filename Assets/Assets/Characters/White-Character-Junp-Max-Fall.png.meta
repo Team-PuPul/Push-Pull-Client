@@ -1,9 +1,9 @@
 fileFormatVersion: 2
-guid: c3c7114566d546642958a86b76ce4553
+guid: 13660a8bd33cf8246bfee18a895a9aa0
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
-  serializedVersion: 12
+  serializedVersion: 13
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -48,7 +48,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 6
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -97,307 +97,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Character-B-Sheet_0
+      name: White-Character-Junp-Max-Fall_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 48
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 45f3933f2a17d454d8e8a96a3a506b29
-      internalID: 380998116
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_1
-      rect:
-        serializedVersion: 2
-        x: 19
-        y: 48
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 51622d7fe8ebc734588de838ea173eb7
-      internalID: -2053443280
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_2
-      rect:
-        serializedVersion: 2
-        x: 35
-        y: 48
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 045289e76b93b0c45bb60aa1066f2ad5
-      internalID: 1478993327
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_3
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 48
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d20ab96a501c6e74398357bede011123
-      internalID: 485218798
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_4
-      rect:
-        serializedVersion: 2
-        x: 67
-        y: 48
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 02b414494afc31e4190a5b293fbdf6e5
-      internalID: -1124970734
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_5
-      rect:
-        serializedVersion: 2
-        x: 3
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 04d0271ae3e0b34428537500ce9a4cf3
-      internalID: 334102648
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_6
-      rect:
-        serializedVersion: 2
-        x: 19
-        y: 32
-        width: 10
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8575e9ea7a71c3d489a91c5f6f2a3ebe
-      internalID: -1080762951
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_7
-      rect:
-        serializedVersion: 2
-        x: 35
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 56e99a47ccbda2046a443a2d084b9ba2
-      internalID: 138028515
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_8
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 154a4f64b312bd845935d88ba7468666
-      internalID: 2037128005
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_9
-      rect:
-        serializedVersion: 2
-        x: 67
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 42f382e854f83a34d817d8c13fc0ae54
-      internalID: 2104795363
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_10
-      rect:
-        serializedVersion: 2
-        x: 83
-        y: 32
-        width: 10
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 147ac26a1b6a9be4a8086fbb65b6a220
-      internalID: -584990888
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_11
-      rect:
-        serializedVersion: 2
-        x: 99
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 09728a2676bb4dc429a1d0510f6d2ea4
-      internalID: -961143179
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_12
-      rect:
-        serializedVersion: 2
-        x: 115
-        y: 32
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f4d1bc6d61896a24b847b042b9ec9c77
-      internalID: 458253897
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_13
-      rect:
-        serializedVersion: 2
-        x: 3
-        y: 16
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4cb3bd1ee586bf64e8981f071405ef86
-      internalID: -1920114563
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Character-B-Sheet_14
-      rect:
-        serializedVersion: 2
-        x: 3
-        y: 0
-        width: 10
-        height: 16
+        x: 0
+        y: 64
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -405,8 +111,218 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cc464965d773c8a4192ab47f4e57f816
-      internalID: -1228305816
+      spriteID: 9326110eb9b4ecb48ac043c22e9a9c77
+      internalID: -1080788204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b4fbad9399c94248a5c39d0e2ab896e
+      internalID: 158558669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb340b3beecc3004b99f337cf9b14872
+      internalID: 1384733170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3239efec6171cc4d84a2e8b1a37acdc
+      internalID: 469055251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b2a77b93636a9e46888be7f8f06b22f
+      internalID: -1591138824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_5
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1d1cff959ab2b440bf4e752bddc3a7b
+      internalID: 1526625344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_6
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 91c6f94d2d71a424da275a995034522e
+      internalID: -1909509045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68988bc83953c1c4ab54c89462dcb399
+      internalID: 1078492673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_8
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee59b4e90f2e7a4409cfc8025cb85f55
+      internalID: -91606045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_9
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4eee791ae6bfcb140b5e3438efefb26a
+      internalID: -98907164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: White-Character-Junp-Max-Fall_10
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53fd451dba29cae4f96d37edcd668178
+      internalID: 1004928181
       vertices: []
       indices: 
       edges: []
@@ -422,21 +338,17 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Character-B-Sheet_0: 380998116
-      Character-B-Sheet_1: -2053443280
-      Character-B-Sheet_10: -584990888
-      Character-B-Sheet_11: -961143179
-      Character-B-Sheet_12: 458253897
-      Character-B-Sheet_13: -1920114563
-      Character-B-Sheet_14: -1228305816
-      Character-B-Sheet_2: 1478993327
-      Character-B-Sheet_3: 485218798
-      Character-B-Sheet_4: -1124970734
-      Character-B-Sheet_5: 334102648
-      Character-B-Sheet_6: -1080762951
-      Character-B-Sheet_7: 138028515
-      Character-B-Sheet_8: 2037128005
-      Character-B-Sheet_9: 2104795363
+      White-Character-Junp-Max-Fall_0: -1080788204
+      White-Character-Junp-Max-Fall_1: 158558669
+      White-Character-Junp-Max-Fall_10: 1004928181
+      White-Character-Junp-Max-Fall_2: 1384733170
+      White-Character-Junp-Max-Fall_3: 469055251
+      White-Character-Junp-Max-Fall_4: -1591138824
+      White-Character-Junp-Max-Fall_5: 1526625344
+      White-Character-Junp-Max-Fall_6: -1909509045
+      White-Character-Junp-Max-Fall_7: 1078492673
+      White-Character-Junp-Max-Fall_8: -91606045
+      White-Character-Junp-Max-Fall_9: -98907164
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
