@@ -6,7 +6,7 @@ using System.Linq;
 
 public class UIButton : Button
 {
-    [SerializeField] private UISoundInfo soundInfo;
+    [SerializeField] protected UISoundInfo soundInfo;
 
     [SerializeField] private ButtonCanvas disableCanvas;        // 비활성화 할(보이지 않게 할 캔버스) 오브젝트
     [SerializeField] private  ButtonCanvas enableCanvas;        // 활성화 할(보이게 할 캔버스) 오브젝트
@@ -16,8 +16,13 @@ public class UIButton : Button
 
     [SerializeField] private ButtonType buttonType;
 
+    // 같은 버튼이 직전과 동일하게 재선택될 때 호버 사운드 중복 재생을 막기 위한 가드
+    private static UIButton _lastHovered;
+
     protected override void Start()
     {
+        base.Start();
+
         if(buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
@@ -26,38 +31,70 @@ public class UIButton : Button
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
+        // 마우스 모드가 아니면 포인터 호버는 무시 (키보드/게임패드 선택 유지)
         if (UIInputManager.instance != null &&
             UIInputManager.instance.currentDevice != InputDeviceType.Mouse)
         {
-            eventData.selectedObject = null;
             return;
         }
 
         base.OnPointerEnter(eventData);
-        eventData.selectedObject = gameObject;
-        // 호버 사운드 재생
-        SoundManager.Instance?.SFXPlay("UI_Hover", soundInfo.HoverSound);
+
+        // 선택만 시킨다. 호버 사운드는 OnSelect에서 단 한 번만 재생됨.
+        if (EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != gameObject)
+        {
+            EventSystem.current.SetSelectedGameObject(gameObject);
+        }
     }
     public override void OnSelect(BaseEventData eventData)
     {
         base.OnSelect(eventData);
-        // 호버 사운드 재생
-        SoundManager.Instance?.SFXPlay("UI_Hover", soundInfo.HoverSound);
+        PlayHover();
     }
+    public override void OnDeselect(BaseEventData eventData)
+    {
+        base.OnDeselect(eventData);
+        // 다른 버튼으로 이동했다가 돌아오면 다시 호버 사운드가 나도록 가드 해제
+        if (_lastHovered == this) _lastHovered = null;
+    }
+
+    // 호버 사운드 단일 진입점
+    private void PlayHover()
+    {
+        if (_lastHovered == this) return;   // 같은 버튼 연속 재선택 시 무음
+        _lastHovered = this;
+
+        // 시스템이 유발한 선택 복구(빈 공간 클릭 후 등)는 무음 처리
+        if (UIInputManager.instance != null && UIInputManager.instance.SuppressHoverSound) return;
+
+        if (soundInfo != null && soundInfo.HoverSound != null)
+        {
+            SoundManager.Instance?.SFXPlay("UI_Hover", soundInfo.HoverSound);
+        }
+    }
+
     #region Click/Submit
     public override void OnPointerClick(PointerEventData eventData)
     {
         base.OnPointerClick(eventData);
-        // 클릭 사운드 재생
-        SoundManager.Instance?.SFXPlay("UI_Click", soundInfo.ClickSound);
+        PlayClick();
         OnClicked();
     }
     public override void OnSubmit(BaseEventData eventData)
     {
         base.OnSubmit(eventData);
-        // 클릭 사운드 재생
-        SoundManager.Instance?.SFXPlay("UI_Click", soundInfo.ClickSound);
+        PlayClick();
         OnClicked();
+    }
+
+    // 클릭 사운드 단일 진입점
+    private void PlayClick()
+    {
+        if (soundInfo != null && soundInfo.ClickSound != null)
+        {
+            SoundManager.Instance?.SFXPlay("UI_Click", soundInfo.ClickSound);
+        }
     }
     #endregion
 

@@ -12,6 +12,10 @@ public class UIInputManager : MonoBehaviour
     // 현재 입력 상태를 외부(UIButton)에서 확인할 수 있도록 속성 정의
     public InputDeviceType currentDevice { get; private set; } = InputDeviceType.Mouse;
 
+    // 시스템이 선택을 복구할 때(빈 공간 클릭 후 등) 호버 사운드를 억제하기 위한 플래그.
+    // UIButton.PlayHover가 이 값을 보고 시스템 유발 선택은 무음 처리한다.
+    public bool SuppressHoverSound { get; private set; }
+
     private GameObject lastSelected;
 
     private void Awake()
@@ -37,12 +41,15 @@ public class UIInputManager : MonoBehaviour
         }
         else
         {
-            // 2. 만약 선택된 게 없는데(null), 마우스 클릭 중이라면?
-            // 빈 공간을 눌렀다는 뜻이므로 직전 오브젝트로 복구
+            // 2. 선택이 풀렸으면(빈 공간 클릭 등) 직전 오브젝트로 복구.
+            //    단, 이 복구는 사용자가 직접 호버한 게 아니므로 호버 사운드를 억제한다.
             if (lastSelected != null && lastSelected.activeInHierarchy)
             {
-                // 마우스 클릭 혹은 입력이 발생했을 때만 복구 (필요에 따라 조건 조절)
+                SuppressHoverSound = true;
+                // SetSelectedGameObject는 내부적으로 OnSelect를 동기 호출하므로,
+                // 플래그를 켠 상태에서 호출하면 PlayHover가 무음으로 처리된다.
                 EventSystem.current.SetSelectedGameObject(lastSelected);
+                SuppressHoverSound = false;
             }
         }
     }
