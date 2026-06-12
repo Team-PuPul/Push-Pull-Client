@@ -19,13 +19,32 @@ public class StepperButton : UIButton
         {
             case MoveDirection.Left:
                 onPrev?.Invoke();
+                PlayStep();
                 break;
             case MoveDirection.Right:
                 onNext?.Invoke();
+                PlayStep();
                 break;
             default:
                 base.OnMove(eventData);
                 break;
+        }
+    }
+
+    // 마우스 클릭은 오른쪽(다음) 이동으로 처리한다. (클릭 한 번 = 리스트 오른쪽 이동)
+    // 기본 UIButton의 클릭 사운드/캔버스 전환 로직 대신 스텝 동작으로 대체한다.
+    public override void OnPointerClick(PointerEventData eventData)
+    {
+        onNext?.Invoke();
+        PlayStep();
+    }
+
+    // 좌/우 이동 시 재생할 사운드. 클릭 사운드를 재사용한다.
+    private void PlayStep()
+    {
+        if (soundInfo != null && soundInfo.ClickSound != null)
+        {
+            SoundManager.Instance?.SFXPlay("UI_Step", soundInfo.ClickSound);
         }
     }
 }
