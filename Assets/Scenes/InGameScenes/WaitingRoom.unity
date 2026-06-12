@@ -3058,14 +3058,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 561971165855064941, guid: c6815753c0315554489a6f683686234d, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 7732084735840748015, guid: 328a3ba6ef8066a4ea7ffdf1d1ffe53f, type: 3}
-    - target: {fileID: 561971165855064941, guid: c6815753c0315554489a6f683686234d, type: 3}
-      propertyPath: spawnPrefabs.Array.size
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
