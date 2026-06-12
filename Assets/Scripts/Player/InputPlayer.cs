@@ -36,6 +36,7 @@ public class InputPlayer : NetworkBehaviour
 
     [SerializeField]
     private float flipThreshold = 0.2f;
+
     public bool cantMove = false;
     public bool jumpAble = true;
 
@@ -62,11 +63,44 @@ public class InputPlayer : NetworkBehaviour
 
     private string lastAnimName = "";
 
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int IsJumpingHash = Animator.StringToHash("IsJumping");
+    private static readonly int IsFallingHash = Animator.StringToHash("IsFalling");
+    private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+    private static readonly int IsClearedHash = Animator.StringToHash("IsCleared");
+
+    [Header("Animation")]
+    [SerializeField]
+    private float verticalAnimDeadZone = 0.15f;
+
+    [SerializeField]
+    private float groundRecheckDelay = 0.08f;
+
+    private bool hasStartedFalling;
+    private bool isGrounded = true;
+    private float ignoreGroundUntilTime;
+
+    private bool lastIsMoving;
+    private bool lastIsJumping;
+    private bool lastIsFalling;
+
     [SyncVar(hook = nameof(OnFlipChanged))]
     private bool syncFlip = false;
 
     [SyncVar(hook = nameof(OnAnimChanged))]
     private string syncAnimName = "";
+
+    [SyncVar(hook = nameof(OnMovingChanged))]
+    private bool syncIsMoving;
+
+    [SyncVar(hook = nameof(OnJumpingChanged))]
+    private bool syncIsJumping;
+
+    [SyncVar(hook = nameof(OnFallingChanged))]
+    private bool syncIsFalling;
+
+    [SyncVar(hook = nameof(OnDeadChanged))]
+    private bool syncIsDead;
 
     private bool clearedStarted = false;
 
@@ -80,31 +114,39 @@ public class InputPlayer : NetworkBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
         if (Anim == null)
             Anim = GetComponent<Animator>();
+
+        ResetVerticalAnimationTracker();
     }
 
     public override void OnStartLocalPlayer()
     {
         if (PlayerInput != null)
             PlayerInput.enabled = true;
+
         if (rb != null)
             rb.isKinematic = false;
 
         CameraFollow cameraFollow = Camera.main?.GetComponent<CameraFollow>();
         if (cameraFollow != null)
-        {
             cameraFollow.SetTarget(transform);
-        }
+
+        ResetVerticalAnimationTracker();
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
+
         if (!isLocalPlayer)
         {
             if (PlayerInput != null)
                 PlayerInput.enabled = false;
+
+            ApplyLocomotionAnimatorState(syncIsMoving, syncIsJumping, syncIsFalling);
+            SetAnimatorBool(IsDeadHash, syncIsDead);
         }
     }
 
@@ -112,6 +154,8 @@ public class InputPlayer : NetworkBehaviour
     {
         if (PlayerInput != null)
             ControlScheme = PlayerInput.currentControlScheme;
+
+        ResetVerticalAnimationTracker();
     }
 
     void Update()
@@ -142,6 +186,7 @@ public class InputPlayer : NetworkBehaviour
         {
             float chargeRate = (ChargeTime > 0f) ? (MaxPushCharge / ChargeTime) : MaxPushCharge;
             PushCharge += chargeRate * Time.deltaTime;
+
             if (PushCharge > MaxPushCharge)
                 PushCharge = MaxPushCharge;
         }
@@ -157,14 +202,6 @@ public class InputPlayer : NetworkBehaviour
 
         if (GrabGlove != null && !GrabGlove.grabing)
             UpdateGrabRotation();
-
-        if (jumpAble)
-        {
-            if (Mathf.Abs(moveInput.x) > 0.01f)
-                PlayAnim("Move");
-            else
-                PlayAnim("Idle");
-        }
     }
 
     void FixedUpdate()
@@ -201,6 +238,229 @@ public class InputPlayer : NetworkBehaviour
             return;
 
         ApplyMovingSurfaceCarry();
+        UpdateAnimatorParameters();
+    }
+
+    public void SetGrounded(bool grounded)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (grounded && Time.time < ignoreGroundUntilTime)
+            return;
+
+        bool wasGrounded = isGrounded;
+
+        isGrounded = grounded;
+        jumpAble = grounded;
+
+        if (grounded)
+        {
+            hasStartedFalling = false;
+            ResetVerticalAnimationTracker();
+
+            if (!wasGrounded || IsInAirAnimatorState())
+                ForceGroundedAnimatorState(Mathf.Abs(moveInput.x) > 0.01f);
+        }
+    }
+
+    private void ForceGroundedAnimatorState(bool isMoving)
+    {
+        lastIsMoving = isMoving;
+        lastIsJumping = false;
+        lastIsFalling = false;
+
+        ApplyLocomotionAnimatorState(isMoving, false, false);
+
+        if (Anim != null)
+            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
+
+        if (isServer)
+        {
+            SetSyncLocomotionAnimatorState(isMoving, false, false);
+            RpcForceGroundedAnimatorState(isMoving);
+        }
+        else
+        {
+            CmdForceGroundedAnimatorState(isMoving);
+        }
+    }
+
+    private bool IsInAirAnimatorState()
+    {
+        if (Anim == null)
+            return false;
+
+        AnimatorStateInfo current = Anim.GetCurrentAnimatorStateInfo(0);
+
+        if (current.IsName("Jump") || current.IsName("Max") || current.IsName("Fall"))
+            return true;
+
+        if (!Anim.IsInTransition(0))
+            return false;
+
+        AnimatorStateInfo next = Anim.GetNextAnimatorStateInfo(0);
+
+        return next.IsName("Jump") || next.IsName("Max") || next.IsName("Fall");
+    }
+
+    [Command]
+    private void CmdForceGroundedAnimatorState(bool isMoving)
+    {
+        SetSyncLocomotionAnimatorState(isMoving, false, false);
+        RpcForceGroundedAnimatorState(isMoving);
+    }
+
+    [ClientRpc]
+    private void RpcForceGroundedAnimatorState(bool isMoving)
+    {
+        if (isLocalPlayer)
+            return;
+
+        lastIsMoving = isMoving;
+        lastIsJumping = false;
+        lastIsFalling = false;
+
+        ApplyLocomotionAnimatorState(isMoving, false, false);
+
+        if (Anim != null)
+            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
+    }
+
+    public void ForceAirborne()
+    {
+        ignoreGroundUntilTime = Time.time + groundRecheckDelay;
+        isGrounded = false;
+        jumpAble = false;
+        hasStartedFalling = false;
+        ResetVerticalAnimationTracker();
+    }
+
+    private void ResetVerticalAnimationTracker()
+    {
+        hasStartedFalling = false;
+    }
+
+    private void UpdateAnimatorParameters()
+    {
+        if (Anim == null)
+            return;
+
+        bool isMoving = Mathf.Abs(moveInput.x) > 0.01f;
+        bool groundedForAnimation = isGrounded && Time.time >= ignoreGroundUntilTime;
+        float ySpeed = rb != null ? rb.velocity.y : 0f;
+
+        if (groundedForAnimation && Mathf.Abs(ySpeed) <= verticalAnimDeadZone)
+        {
+            hasStartedFalling = false;
+            SetLocomotionAnimatorState(isMoving, false, false);
+
+            if (IsInAirAnimatorState())
+                ForceGroundedAnimatorState(isMoving);
+
+            return;
+        }
+
+        bool isJumping = false;
+        bool isFalling = false;
+
+        if (ySpeed > verticalAnimDeadZone)
+        {
+            hasStartedFalling = false;
+            isJumping = true;
+        }
+        else if (ySpeed < -verticalAnimDeadZone)
+        {
+            hasStartedFalling = true;
+            isFalling = true;
+        }
+        else if (!groundedForAnimation && hasStartedFalling)
+        {
+            isFalling = true;
+        }
+
+        SetLocomotionAnimatorState(isMoving, isJumping, isFalling);
+    }
+
+    private void SetLocomotionAnimatorState(bool isMoving, bool isJumping, bool isFalling)
+    {
+        if (lastIsMoving == isMoving && lastIsJumping == isJumping && lastIsFalling == isFalling)
+            return;
+
+        lastIsMoving = isMoving;
+        lastIsJumping = isJumping;
+        lastIsFalling = isFalling;
+
+        ApplyLocomotionAnimatorState(isMoving, isJumping, isFalling);
+
+        if (!isLocalPlayer)
+            return;
+
+        if (isServer)
+            SetSyncLocomotionAnimatorState(isMoving, isJumping, isFalling);
+        else
+            CmdSyncLocomotionAnimatorState(isMoving, isJumping, isFalling);
+    }
+
+    private void ApplyLocomotionAnimatorState(bool isMoving, bool isJumping, bool isFalling)
+    {
+        SetAnimatorBool(IsMovingHash, isMoving);
+        SetAnimatorBool(IsJumpingHash, isJumping);
+        SetAnimatorBool(IsFallingHash, isFalling);
+    }
+
+    private void SetAnimatorBool(int parameterHash, bool value)
+    {
+        if (Anim == null)
+            return;
+
+        Anim.SetBool(parameterHash, value);
+    }
+
+    [Command]
+    private void CmdSyncLocomotionAnimatorState(bool isMoving, bool isJumping, bool isFalling)
+    {
+        SetSyncLocomotionAnimatorState(isMoving, isJumping, isFalling);
+    }
+
+    [Server]
+    private void SetSyncLocomotionAnimatorState(bool isMoving, bool isJumping, bool isFalling)
+    {
+        syncIsMoving = isMoving;
+        syncIsJumping = isJumping;
+        syncIsFalling = isFalling;
+    }
+
+    private void OnMovingChanged(bool oldValue, bool newValue)
+    {
+        if (isLocalPlayer)
+            return;
+
+        SetAnimatorBool(IsMovingHash, newValue);
+    }
+
+    private void OnJumpingChanged(bool oldValue, bool newValue)
+    {
+        if (isLocalPlayer)
+            return;
+
+        SetAnimatorBool(IsJumpingHash, newValue);
+    }
+
+    private void OnFallingChanged(bool oldValue, bool newValue)
+    {
+        if (isLocalPlayer)
+            return;
+
+        SetAnimatorBool(IsFallingHash, newValue);
+    }
+
+    private void OnDeadChanged(bool oldValue, bool newValue)
+    {
+        if (isLocalPlayer)
+            return;
+
+        SetAnimatorBool(IsDeadHash, newValue);
     }
 
     private void ApplyMovingSurfaceCarry()
@@ -230,17 +490,13 @@ public class InputPlayer : NetworkBehaviour
             bool movingAgainstPlatform = Mathf.Sign(moveInput.x) != Mathf.Sign(surfaceDelta.x);
 
             if (movingAgainstPlatform)
-            {
                 extraMove.x = moveInput.x * Mathf.Abs(surfaceDelta.x) * againstPlatformBoost;
-            }
         }
 
         Vector3 carryDelta = surfaceDelta + extraMove;
 
         if (carryDelta != Vector3.zero)
-        {
             transform.position += carryDelta;
-        }
 
         lastMovingSurfacePosition = surfacePosition;
     }
@@ -303,24 +559,35 @@ public class InputPlayer : NetworkBehaviour
     {
         if (isLocalPlayer)
             return;
+
         PlayAnimLocal(newVal);
     }
 
     public void PlayAnim(string animName)
     {
+        if (string.IsNullOrEmpty(animName))
+            return;
+
+        if (animName == lastAnimName)
+            return;
+
+        lastAnimName = animName;
         PlayAnimLocal(animName);
 
-        if (animName != lastAnimName)
-        {
-            lastAnimName = animName;
+        if (!isLocalPlayer)
+            return;
+
+        if (isServer)
+            syncAnimName = animName;
+        else
             CmdPlayAnimation(animName);
-        }
     }
 
     private void PlayAnimLocal(string animName)
     {
         if (string.IsNullOrEmpty(animName))
             return;
+
         Anim?.Play(animName);
     }
 
@@ -334,6 +601,7 @@ public class InputPlayer : NetworkBehaviour
     {
         if (isLocalPlayer)
             return;
+
         ApplyFlip(newVal);
     }
 
@@ -366,6 +634,7 @@ public class InputPlayer : NetworkBehaviour
     {
         if (isLocalPlayer)
             return;
+
         PushGlove?.DoPunchAnim();
     }
 
@@ -405,6 +674,7 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
             return;
+
         Rigidbody2D rigid = identity.GetComponent<Rigidbody2D>();
         if (rigid == null)
             return;
@@ -417,10 +687,12 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         if (context.started || context.performed)
             moveLeft = true;
         else if (context.canceled)
             moveLeft = false;
+
         UpdateMoveInput();
     }
 
@@ -428,10 +700,12 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         if (context.started || context.performed)
             moveRight = true;
         else if (context.canceled)
             moveRight = false;
+
         UpdateMoveInput();
     }
 
@@ -451,15 +725,16 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         if (context.performed && jumpAble)
         {
             rb.AddForce(Vector2.up * 15f, ForceMode2D.Impulse);
-            jumpAble = false;
+            ForceAirborne();
+
             SoundManager.Instance?.SFXPlay(
                 "PlayerJump_1",
                 PlayerSounds[(int)global::PlayerSounds.Jump]
             );
-            PlayAnim("Jump");
         }
     }
 
@@ -467,6 +742,7 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         if (context.started)
         {
             PushHeld = true;
@@ -476,14 +752,17 @@ public class InputPlayer : NetworkBehaviour
         else if (context.canceled)
         {
             PushHeld = false;
+
             if (isCharging)
             {
                 isCharging = false;
                 Push = true;
+
                 SoundManager.Instance?.SFXPlay(
                     "PlayerPush_1",
                     PlayerSounds[(int)global::PlayerSounds.Push]
                 );
+
                 PushGlove?.DoPunchAnim();
                 SyncPunchAnim();
             }
@@ -513,10 +792,12 @@ public class InputPlayer : NetworkBehaviour
             GrabHeld = false;
             isGrabHolding = false;
             GrabGlove?.DOGrab();
+
             SoundManager.Instance?.SFXPlay(
                 "PlayerPull_1",
                 PlayerSounds[(int)global::PlayerSounds.Pull]
             );
+
             grabControlInput = Vector2.zero;
         }
     }
@@ -525,6 +806,7 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         grabControlInput = context.ReadValue<Vector2>();
     }
 
@@ -639,6 +921,7 @@ public class InputPlayer : NetworkBehaviour
     {
         flip = !flip;
         ApplyFlip(flip);
+
         if (isLocalPlayer)
             CmdSyncFlip(flip);
     }
@@ -652,6 +935,7 @@ public class InputPlayer : NetworkBehaviour
             PushCharge = 0f;
             return true;
         }
+
         outCharge = 0f;
         return false;
     }
@@ -660,9 +944,23 @@ public class InputPlayer : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
-        SoundManager.Instance.SFXPlay("PlayerDied_1", PlayerSounds[(int)global::PlayerSounds.Die]);
+
+        SoundManager.Instance?.SFXPlay("PlayerDied_1", PlayerSounds[(int)global::PlayerSounds.Die]);
+
         cantMove = true;
-        PlayAnim("Die");
+        SetLocomotionAnimatorState(false, false, false);
+        SetAnimatorBool(IsDeadHash, true);
+
+        if (isServer)
+            syncIsDead = true;
+        else
+            CmdSyncDead(true);
+    }
+
+    [Command]
+    private void CmdSyncDead(bool isDead)
+    {
+        syncIsDead = isDead;
     }
 
     public void Cleared()
@@ -674,9 +972,7 @@ public class InputPlayer : NetworkBehaviour
         }
 
         if (isLocalPlayer)
-        {
             CmdCleared();
-        }
     }
 
     [Command]
@@ -690,15 +986,15 @@ public class InputPlayer : NetworkBehaviour
     {
         if (clearedStarted)
             return;
+
         clearedStarted = true;
 
         cantMove = true;
-        PlayAnimLocal("Cleared");
+        ApplyLocomotionAnimatorState(false, false, false);
+        SetAnimatorBool(IsClearedHash, true);
 
         if (gameObject.TryGetComponent<SpriteRenderer>(out SpriteRenderer sprite))
-        {
             StartCoroutine(FadeOutSprite(sprite, 0.5f));
-        }
     }
 
     private IEnumerator FadeOutSprite(SpriteRenderer sprite, float duration)

@@ -1448,7 +1448,6 @@ GameObject:
   - component: {fileID: 5778999015968660239}
   - component: {fileID: 6933137984212265782}
   - component: {fileID: 4883067168346608674}
-  - component: {fileID: 7338942496381170402}
   - component: {fileID: 5290099763382334911}
   - component: {fileID: 5365787813882177112}
   - component: {fileID: 8236653997680549648}
@@ -1666,18 +1665,6 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
---- !u!114 &7338942496381170402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6441614388983903939}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e154110ee543fb478491d35570f1452, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5290099763382334911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1850,6 +1837,7 @@ MonoBehaviour:
   PushCharge: 0
   Push: 0
   ControlScheme: Keyboard, Mouse
+  verticalAnimDeadZone: 0.15
   againstPlatformBoost: 0.5
 --- !u!114 &8236653997680549648
 MonoBehaviour:
