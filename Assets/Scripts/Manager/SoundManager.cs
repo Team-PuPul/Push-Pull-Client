@@ -24,8 +24,13 @@ public class SoundManager : MonoBehaviour
 	}
 	public AudioMixer audioMixer;
 
+	public const string MasterVolumeKey = "MasterVolume";
+	public const string BgmVolumeKey = "MusicVolume";
+	public const string SfxVolumeKey = "SFXVolume";
+
 	private static SoundManager instance;
 	private ObjectPool<AudioSource> sfxPool;
+
 
 	private void Awake()
 	{
@@ -60,26 +65,27 @@ public class SoundManager : MonoBehaviour
 			Destroy(gameObject);
 		}
 	}
+
+	// PlayerPrefs 키 이름과 오디오 믹서 키 이름은 동일합니다.
 	private void Start()
 	{
-		if (PlayerPrefs.HasKey("MusicVolume"))
-		{
-			BGSoundVolume(PlayerPrefs.GetFloat("MusicVolume"));
-		}
-		else
-		{
-			BGSoundVolume(1);
-		}
-
-		if (PlayerPrefs.HasKey("SFXVolume"))
-		{
-			SFXSoundVolume(PlayerPrefs.GetFloat("SFXVolume"));
-		}
-		else
-		{
-			SFXSoundVolume(1);
-		}
+		LoadSoundKey(MasterVolumeKey);
+		LoadSoundKey(SfxVolumeKey);
+		LoadSoundKey(BgmVolumeKey);
 	}
+
+	// 사운드 PlayerPrefs 내부 값 가져오기.
+	private void LoadSoundKey(string key)
+	{
+        if (PlayerPrefs.HasKey(key))
+        {
+            SetSoundVolume(key, PlayerPrefs.GetFloat(key));
+        }
+        else
+        {
+            SetSoundVolume(key, 1);
+        }
+    }
 
     #region Sounds
 	public void SFXPlay(string sfxName, AudioClip clip)
@@ -107,23 +113,18 @@ public class SoundManager : MonoBehaviour
 	{
 		StartCoroutine(FadeOut(BgPlayer, time));
 	}
-	public void BGSoundVolume(float val)
+
+	public void SetSoundVolume(string key, float volume)
 	{
-        float n = Mathf.Log10(Mathf.Max(val, 0.0001f)) * 20;
-        audioMixer.SetFloat("MusicVolume", n);
-		PlayerPrefs.SetFloat("MusicVolume", val);
-		PlayerPrefs.Save();
-	}
-	public void SFXSoundVolume(float val)
-	{
-        float n = Mathf.Log10(Mathf.Max(val, 0.0001f)) * 20;
-        audioMixer.SetFloat("SFXVolume", n);
-		PlayerPrefs.SetFloat("SFXVolume", val);
-		PlayerPrefs.Save();
-	}
+        float n = Mathf.Log10(Mathf.Max(volume, 0.0001f)) * 20;
+        audioMixer.SetFloat(key, n);
+        PlayerPrefs.SetFloat(key, volume);
+        PlayerPrefs.Save();
+    }
+
     #endregion
-    
-	#region Coroutines
+
+    #region Coroutines
     private IEnumerator ReleaseAfterRealtime(AudioSource source, float delay)
 	{
 		yield return new WaitForSecondsRealtime(delay); // TimeScale 0이어도 기다림
