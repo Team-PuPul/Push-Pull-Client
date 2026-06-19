@@ -4666,6 +4666,8 @@ MonoBehaviour:
   enablePanel: {fileID: 0}
   buttonType: 0
   soundSlider: {fileID: 1423227361}
+  editingColor: {r: 0.41823888, g: 1, b: 0.9848126, a: 1}
+  soundType: 0
 --- !u!1 &703638279
 GameObject:
   m_ObjectHideFlags: 0
@@ -7533,12 +7535,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1068764829}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6347b5907ced62542af62cc4f9ee9b43, type: 3}
+  m_Script: {fileID: 11500000, guid: cbc4889ee8c0fe54dab3a6296230a63e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   baseEnabled: 0
   fadeDuration: 0.2
-  firstSelectButton: {fileID: 1321276237}
+  firstSelectButton: {fileID: 690041196}
 --- !u!1 &1078795471
 GameObject:
   m_ObjectHideFlags: 0
@@ -9910,7 +9912,7 @@ MonoBehaviour:
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
   disableCanvas: {fileID: 939928348}
   enableCanvas: {fileID: 2002665543}
-  disablePanel: {fileID: 1068764834}
+  disablePanel: {fileID: 0}
   enablePanel: {fileID: 1825695388}
   buttonType: 2
 --- !u!114 &1321276238
@@ -10431,6 +10433,8 @@ MonoBehaviour:
   enablePanel: {fileID: 0}
   buttonType: 0
   soundSlider: {fileID: 807424099}
+  editingColor: {r: 0.41823888, g: 1, b: 0.9848126, a: 1}
+  soundType: 2
 --- !u!1 &1510192559
 GameObject:
   m_ObjectHideFlags: 0
@@ -12192,6 +12196,8 @@ MonoBehaviour:
   enablePanel: {fileID: 0}
   buttonType: 0
   soundSlider: {fileID: 581202324}
+  editingColor: {r: 0.41823888, g: 1, b: 0.9848126, a: 1}
+  soundType: 1
 --- !u!1 &1844092351
 GameObject:
   m_ObjectHideFlags: 0
