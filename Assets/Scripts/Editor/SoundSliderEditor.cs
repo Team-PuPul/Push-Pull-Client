@@ -11,21 +11,27 @@ using UnityEngine;
 public class SoundSliderEditor : UIButtonEditor
 {
     SerializedProperty soundSliderProp;
+    SerializedProperty editingColorProp;
+    SerializedProperty soundTypeProp;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         // 실제 SoundSlider 클래스의 변수명과 일치해야 합니다.
         soundSliderProp = serializedObject.FindProperty("soundSlider");
+        editingColorProp = serializedObject.FindProperty("editingColor");
+        soundTypeProp = serializedObject.FindProperty("soundType");
     }
 
     public override void OnInspectorGUI()
     {
-        // 1. 사운드 슬라이더 전용 참조
+        // 1. 사운드 슬라이더 전용 필드
         serializedObject.Update();
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Sound Slider", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(soundSliderProp, new GUIContent("Sound Slider"));
+        EditorGUILayout.PropertyField(editingColorProp, new GUIContent("Editing Color"));
+        EditorGUILayout.PropertyField(soundTypeProp, new GUIContent("Sound Type"));
         serializedObject.ApplyModifiedProperties();
 
         // 2. UIButton 공통 인스펙터 (사운드 / 버튼 타입 / Base Button)
