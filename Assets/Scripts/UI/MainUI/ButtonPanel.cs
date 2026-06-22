@@ -50,6 +50,11 @@ public class ButtonPanel : MonoBehaviour
     // 마지막 선택 버튼이 기록돼 있으면 그 위치를, 없으면(첫 진입) 첫 버튼을 선택
     private void SelectButton()
     {
+        if (firstSelectButton == null)
+        {
+            Debug.Log($"{gameObject.name}의 첫번째 버튼이 할당되지 않았습니다!");
+            return;
+        } 
         if (lastSelectedButton != null && EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(lastSelectedButton);
         else
