@@ -77,12 +77,17 @@ public class UIButton : Button
     #region Click/Submit
     public override void OnPointerClick(PointerEventData eventData)
     {
+        // 리바인딩 진행 중에는 버튼이 눌리지 않도록 무시
+        if (RebindingManager.IsRebinding) return;
+
         base.OnPointerClick(eventData);
         PlayClick();
         OnClicked();
     }
     public override void OnSubmit(BaseEventData eventData)
     {
+        if (RebindingManager.IsRebinding) return;
+
         base.OnSubmit(eventData);
         PlayClick();
         OnClicked();
