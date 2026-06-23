@@ -5,23 +5,28 @@ public class Trampoline : MonoBehaviour
 {
     public GameObject trampoline;
     public float JumpPower = 2;
+
     [SerializeField]
     AudioClip clip;
 
     public Animator spriteAnimator;
-/*    private void Awake()
-    {
-        trampoline = transform.parent.parent.gameObject;
-    }*/
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
+        if (collision.gameObject.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
         {
-            SoundManager.Instance.SFXPlay("Trampoline",clip);
+            SoundManager.Instance.SFXPlay("Trampoline", clip);
             rb.AddForce(Vector2.up * JumpPower, ForceMode2D.Impulse);
+
+            InputPlayer player = collision.gameObject.GetComponent<InputPlayer>();
+
+            if (player == null)
+                player = collision.gameObject.GetComponentInParent<InputPlayer>();
+
+            if (player != null)
+                player.ForceAirborne();
+
             spriteAnimator.SetTrigger("Jump");
-            //StartCoroutine(ScaleSet());
         }
     }
 
@@ -38,6 +43,7 @@ public class Trampoline : MonoBehaviour
             trampoline.transform.localScale = scale;
             yield return null;
         }
+
         scale.y = 0.8f;
 
         yield return StartCoroutine(ScaleReset());
@@ -56,8 +62,7 @@ public class Trampoline : MonoBehaviour
             trampoline.transform.localScale = scale;
             yield return null;
         }
+
         scale.y = 1;
     }
-
-
 }

@@ -1,24 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KeyCountUI : MonoBehaviour
 {
     [SerializeField]
-    Text countText;
+    private Text countText;
 
-    KeyCounter counter;
+    private KeyCounter counter;
+
     private void Start()
     {
         counter = FindObjectOfType<KeyCounter>();
-        SetCountText();
+
+        if (counter != null)
+            SetCountText(counter.KeyCount, counter.MaxCount);
+        else
+            SetCountText(0, 0);
     }
 
-    public void SetCountText()
+    public void SetCountText(int keyCount, int maxCount)
     {
-        countText.text = $"{counter.KeyCount}"+" / "+$"{counter._maxCount}";
-        if(counter.KeyCount == counter._maxCount)
-            countText.color = Color.yellow;
+        if (countText == null)
+            return;
+
+        countText.text = $"{keyCount} / {maxCount}";
+        countText.color = keyCount == maxCount && maxCount > 0 ? Color.yellow : Color.white;
     }
 }

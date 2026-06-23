@@ -47,7 +47,7 @@ public class TurnColorObject : NetworkBehaviour
     [ServerCallback]
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.GetComponentInParent<InputPlayer>())
+        if (!collision.CompareTag("Player"))
             return;
 
         TurnColorOnServer();
