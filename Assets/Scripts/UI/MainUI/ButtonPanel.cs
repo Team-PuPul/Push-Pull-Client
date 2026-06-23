@@ -7,7 +7,7 @@ public class ButtonPanel : MonoBehaviour
 {
     [SerializeField] private bool baseEnabled = false;
     [SerializeField] private float fadeDuration = 0.2f;
-    [SerializeField] private Button firstSelectButton;
+    [SerializeField] private Selectable firstSelectButton;
 
     private bool isDisabled = false;
     private CanvasGroup canvasGroup;
