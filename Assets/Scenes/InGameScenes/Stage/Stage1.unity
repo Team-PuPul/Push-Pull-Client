@@ -3438,8 +3438,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1714485734}
   - {fileID: 327978919}
-  - {fileID: 269852821}
-  - {fileID: 1884606450}
   - {fileID: 289181636}
   - {fileID: 1246315602}
   - {fileID: 757629303}
@@ -3452,7 +3450,6 @@ SceneRoots:
   - {fileID: 22655492}
   - {fileID: 1163278937}
   - {fileID: 1671247119}
-  - {fileID: 607590568}
   - {fileID: 196161635}
   - {fileID: 1816941998}
   - {fileID: 1434835858}

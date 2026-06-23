@@ -1,0 +1,190 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a6e3f2057599554ea88e41a5731d90a, type: 3}
+  m_Name: KeySpriteSO
+  m_EditorClassIdentifier: 
+  keySprites:
+  - key: a
+    sprite: {fileID: 21300000, guid: 110b9bbdf249b8546b6a247d1d1dcf6b, type: 3}
+  - key: b
+    sprite: {fileID: 21300000, guid: 655e9d922bead4e40a5deb40441dda7b, type: 3}
+  - key: c
+    sprite: {fileID: 21300000, guid: 56807875d53feec4aab1586e8525cefb, type: 3}
+  - key: d
+    sprite: {fileID: 21300000, guid: 2f4c1337bd87e73408a3fedcc4050f04, type: 3}
+  - key: e
+    sprite: {fileID: 21300000, guid: 0f0a225f6d68b4b45b00c7c64e460d7c, type: 3}
+  - key: f
+    sprite: {fileID: 21300000, guid: 7c14212b2f2299d498e5d89644093309, type: 3}
+  - key: g
+    sprite: {fileID: 21300000, guid: 8d288f91ac62a294fb38cbe1290711fa, type: 3}
+  - key: h
+    sprite: {fileID: 21300000, guid: 0fee9a8b1b4505a4ebee730a50d7ab94, type: 3}
+  - key: i
+    sprite: {fileID: 21300000, guid: 9c29dfb5272cbea449d6bc076ab9c280, type: 3}
+  - key: j
+    sprite: {fileID: 21300000, guid: 2c042a602c226e349b4fb82c4009bdc5, type: 3}
+  - key: k
+    sprite: {fileID: 21300000, guid: 6cc7832c753101b47bad705b3edc2dc2, type: 3}
+  - key: l
+    sprite: {fileID: 21300000, guid: 245b753f20d0a74448d558d64a51773e, type: 3}
+  - key: m
+    sprite: {fileID: 21300000, guid: 842ea1db3e019e04facb85174a6a238f, type: 3}
+  - key: n
+    sprite: {fileID: 21300000, guid: 1b1a2eb8db3b08c44beeea617de68c10, type: 3}
+  - key: o
+    sprite: {fileID: 21300000, guid: fcb0f3fc863038a4eb60c80f16a8ce70, type: 3}
+  - key: p
+    sprite: {fileID: 21300000, guid: 883ce0236ae764b4bbe6a0949f969827, type: 3}
+  - key: q
+    sprite: {fileID: 21300000, guid: e9162f916afac5f4aa44222230ab2761, type: 3}
+  - key: r
+    sprite: {fileID: 21300000, guid: 9dc8b63d60868ef489673ce4e2c1e319, type: 3}
+  - key: s
+    sprite: {fileID: 21300000, guid: fe2fd5149e4393246bf97d5613adb565, type: 3}
+  - key: t
+    sprite: {fileID: 21300000, guid: 768a0677dcf995840a2da885144e1859, type: 3}
+  - key: u
+    sprite: {fileID: 21300000, guid: a008c66e045941c428c08da619d38b1e, type: 3}
+  - key: v
+    sprite: {fileID: 21300000, guid: 3505ee5b633d5644982a445d181a0a0d, type: 3}
+  - key: w
+    sprite: {fileID: 21300000, guid: 5f506d8f702bc2b45aa2a232ab3f7e86, type: 3}
+  - key: x
+    sprite: {fileID: 21300000, guid: 988d886c4ef080a4ba2926546f8c78a7, type: 3}
+  - key: y
+    sprite: {fileID: 21300000, guid: 6fd631fe9f75da747b08d3de55db3a25, type: 3}
+  - key: z
+    sprite: {fileID: 21300000, guid: fa6fc90cd1fb06c40a81ddefab49920e, type: 3}
+  - key: 1
+    sprite: {fileID: 21300000, guid: c863a142bcd197c45abde46aa50c89b9, type: 3}
+  - key: 2
+    sprite: {fileID: 21300000, guid: 46907d59c048c994586031fbfcf5f4d7, type: 3}
+  - key: 3
+    sprite: {fileID: 21300000, guid: 4c8d508519ba43a488078aaf0cb89c53, type: 3}
+  - key: 4
+    sprite: {fileID: 21300000, guid: d7d2d19a242ad584ca1e03f76b0bfb48, type: 3}
+  - key: 5
+    sprite: {fileID: 21300000, guid: 2ba4dc4c9b595174e8a6f1e91082ce7c, type: 3}
+  - key: 6
+    sprite: {fileID: 21300000, guid: e8ebf6089a44b134087af8b363152d55, type: 3}
+  - key: 7
+    sprite: {fileID: 21300000, guid: 5c8a24d62a311f44db60ccc31a5e0021, type: 3}
+  - key: 8
+    sprite: {fileID: 21300000, guid: 27325ed0a88b9ce41ac398d37bce9c4d, type: 3}
+  - key: 9
+    sprite: {fileID: 21300000, guid: d85e425dbc68c954ebc02db08edbc87f, type: 3}
+  - key: 0
+    sprite: {fileID: 21300000, guid: 58b00899c9daf6443b1a293df1698602, type: 3}
+  - key: f1
+    sprite: {fileID: 21300000, guid: 1a8b8f1707fe7f64698bddffc27509dd, type: 3}
+  - key: f2
+    sprite: {fileID: 21300000, guid: 9e5ade02c7680524f99fbfe0f5847551, type: 3}
+  - key: f3
+    sprite: {fileID: 21300000, guid: 6c8f1dfe3460cda4aabb4e73368e66a9, type: 3}
+  - key: f4
+    sprite: {fileID: 21300000, guid: c7ef02a7f69e463429be7f536be5df90, type: 3}
+  - key: f5
+    sprite: {fileID: 21300000, guid: fe7c764b7a2344f48b848a88bf4a81d4, type: 3}
+  - key: f6
+    sprite: {fileID: 21300000, guid: 1c2946db40de2294d90089dd1db58434, type: 3}
+  - key: f7
+    sprite: {fileID: 21300000, guid: e7c20e8153034a2468da30ebb0709e74, type: 3}
+  - key: f8
+    sprite: {fileID: 21300000, guid: 3dee4baadf30e17448ac0a423ac1ac71, type: 3}
+  - key: f9
+    sprite: {fileID: 21300000, guid: 4f0492a77c12a0242a97c727ed05848d, type: 3}
+  - key: f10
+    sprite: {fileID: 21300000, guid: 5ed2d9d6c1575cb4aa90555aba1df14f, type: 3}
+  - key: f11
+    sprite: {fileID: 21300000, guid: 0379d2e7924e851409d07cd88397741d, type: 3}
+  - key: f12
+    sprite: {fileID: 21300000, guid: 782b742d3ce83244bb6891efc567b633, type: 3}
+  - key: upArrow
+    sprite: {fileID: 21300000, guid: 5b88362ba78a780448cc77401a44c710, type: 3}
+  - key: rightArrow
+    sprite: {fileID: 21300000, guid: 36c910d1d1206d84ca3c3dcd4f9dc664, type: 3}
+  - key: downArrow
+    sprite: {fileID: 21300000, guid: 59bf6eab063b4c84dac2a8a513200f8b, type: 3}
+  - key: leftArrow
+    sprite: {fileID: 21300000, guid: 83261d3798e6e0f4fb2126501dadb2d0, type: 3}
+  - key: escape
+    sprite: {fileID: 21300000, guid: d350c15b362b8714f82e5fc238f156d0, type: 3}
+  - key: space
+    sprite: {fileID: 21300000, guid: 58e0d0357e6950c4d9dc2d9c89a4ad3e, type: 3}
+  - key: enter
+    sprite: {fileID: 21300000, guid: 3dca7fdff50fd2e46acaa7128d28e3f4, type: 3}
+  - key: backspace
+    sprite: {fileID: 21300000, guid: 87fe7aa17cc12824dbdb3779f1c7f041, type: 3}
+  - key: tab
+    sprite: {fileID: 21300000, guid: 4add71fbc2382304192003344915420c, type: 3}
+  - key: capsLock
+    sprite: {fileID: 21300000, guid: 15e97e1d460ffe54b948d9a992e2772e, type: 3}
+  - key: leftShift
+    sprite: {fileID: 21300000, guid: 29d821f0432002f4e9de6d03b8f1f65e, type: 3}
+  - key: rightShift
+    sprite: {fileID: 21300000, guid: 29d821f0432002f4e9de6d03b8f1f65e, type: 3}
+  - key: shift
+    sprite: {fileID: 21300000, guid: 29d821f0432002f4e9de6d03b8f1f65e, type: 3}
+  - key: leftCtrl
+    sprite: {fileID: 21300000, guid: 48e9bb72870a629418e1868c48bf189f, type: 3}
+  - key: rightCtrl
+    sprite: {fileID: 21300000, guid: 48e9bb72870a629418e1868c48bf189f, type: 3}
+  - key: ctrl
+    sprite: {fileID: 21300000, guid: 48e9bb72870a629418e1868c48bf189f, type: 3}
+  - key: leftAlt
+    sprite: {fileID: 21300000, guid: 4a7621621f744fb458aeb48cdecf95d1, type: 3}
+  - key: rightAlt
+    sprite: {fileID: 21300000, guid: 4a7621621f744fb458aeb48cdecf95d1, type: 3}
+  - key: alt
+    sprite: {fileID: 21300000, guid: 4a7621621f744fb458aeb48cdecf95d1, type: 3}
+  - key: delete
+    sprite: {fileID: 21300000, guid: 68a6d057bfb5abb4d9151522953f052d, type: 3}
+  - key: home
+    sprite: {fileID: 21300000, guid: f36e6d3941f2d00488a64300a47998bd, type: 3}
+  - key: end
+    sprite: {fileID: 21300000, guid: 199edf397285e1c46ac469320e0a0d7b, type: 3}
+  - key: insert
+    sprite: {fileID: 21300000, guid: 8f9fd644de1cc7c4a901db37704d807b, type: 3}
+  - key: pageUp
+    sprite: {fileID: 21300000, guid: 7a937460e9d63ee4da51b5ac614d6ef3, type: 3}
+  - key: pageDown
+    sprite: {fileID: 21300000, guid: 34a6c1e7368d15a46890d324d20cd8db, type: 3}
+  - key: backquote
+    sprite: {fileID: 21300000, guid: 9bba576b0617cec438e7344518a35b1c, type: 3}
+  - key: minus
+    sprite: {fileID: 21300000, guid: f754a4dabded2c847989656c08067ff7, type: 3}
+  - key: equals
+    sprite: {fileID: 21300000, guid: d9d0678de926dee439cc7d5684b7b57d, type: 3}
+  - key: leftBracket
+    sprite: {fileID: 21300000, guid: a9f05c5d78c859c428930ef6196c316f, type: 3}
+  - key: rightBracket
+    sprite: {fileID: 21300000, guid: db39eaa452d110244a38461c9871d59b, type: 3}
+  - key: backslash
+    sprite: {fileID: 21300000, guid: 5b58965af3f803a48b4f11d4f2113575, type: 3}
+  - key: semicolon
+    sprite: {fileID: 21300000, guid: 8aeb0ba688b0cc74da117817c323fb18, type: 3}
+  - key: quote
+    sprite: {fileID: 21300000, guid: 501ea0b6bb0c6684f9e0ece0c585f21d, type: 3}
+  - key: comma
+    sprite: {fileID: 21300000, guid: 573ee9d8fca91744c9d0e4781ecd3520, type: 3}
+  - key: period
+    sprite: {fileID: 21300000, guid: 62c60700f15a14a439f15275bb3cba98, type: 3}
+  - key: slash
+    sprite: {fileID: 21300000, guid: 64c361ef9bf974c42b6aa6cbd77902f1, type: 3}
+  - key: leftButton
+    sprite: {fileID: 21300000, guid: 99310d5299369b742a6e5d394314c7b2, type: 3}
+  - key: rightButton
+    sprite: {fileID: 21300000, guid: 6eec3863d421d154598b8d56c22b2629, type: 3}
+  - key: middleButton
+    sprite: {fileID: 21300000, guid: 4f01477f561b36b49ba7ee2c85b7882d, type: 3}
+  fallbackSprite: {fileID: 21300000, guid: 85caeaa916460b84089fb5ee69d11197, type: 3}
