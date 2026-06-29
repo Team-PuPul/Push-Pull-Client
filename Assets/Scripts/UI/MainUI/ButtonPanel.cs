@@ -3,9 +3,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class ButtonPanel : MonoBehaviour
 {
     [SerializeField] private bool baseEnabled = false;
+    [Tooltip("다른 패널/캔버스로 이동 시 마지막으로 선택되어 있는 버튼을 저장합니다.")]
+    [SerializeField] private bool saveLastButton = true;
     [SerializeField] private float fadeDuration = 0.2f;
     [SerializeField] private Selectable firstSelectButton;
 
@@ -64,7 +67,7 @@ public class ButtonPanel : MonoBehaviour
     // 패널을 떠나기 직전 현재 선택된 버튼을 기록 (이 패널 소속 버튼일 때만)
     private void SaveSelection()
     {
-        if (EventSystem.current == null) return;
+        if (EventSystem.current == null || !saveLastButton) return;
 
         GameObject current = EventSystem.current.currentSelectedGameObject;
         if (current != null && current.transform.IsChildOf(transform))

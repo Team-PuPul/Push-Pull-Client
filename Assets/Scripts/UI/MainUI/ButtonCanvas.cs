@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class ButtonCanvas : MonoBehaviour
 {
     public bool MainCanvas
