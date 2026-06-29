@@ -117,9 +117,35 @@ chore(Build): ProjectSettings 빌드 타겟 변경
 refactor(Manager): 게임 매니저 싱글톤 구조 개선
 ```
  
+### 3-1단계: 관련 이슈 탐색 및 연결 (서브 에이전트)
+
+각 커밋 그룹에 대해 **서브 에이전트(`general-purpose`)를 실행해 해당 변경과 관련된 GitHub 이슈를 탐색**한다.
+
+**탐색 방법:**
+- `Agent` 도구로 `general-purpose` 서브 에이전트를 띄우고, 커밋 그룹의 변경 파일·커밋 메시지(type/scope/subject)·diff 요약을 전달한다.
+- 서브 에이전트는 `gh issue list --state open` 및 `gh search issues` 등을 사용해 열린 이슈 중 해당 변경과 의미적으로 일치하는 이슈를 찾는다.
+- 매칭 기준: 이슈 제목·본문·라벨이 커밋의 기능/버그/scope와 직접 관련될 것. 애매하면 연결하지 않는다.
+- 서브 에이전트는 **관련 이슈 번호(`#N`)와 매칭 근거**만 반환한다. (커밋·push 등 쓰기 작업은 하지 않는다)
+
+> 여러 커밋 그룹이 있으면, 그룹별로 독립적으로 이슈를 탐색한다. 동일 이슈가 여러 그룹에 걸치면 가장 관련 깊은 그룹에만 연결한다.
+
+**이슈 연결 방법 (커밋 description/body):**
+- 관련 이슈를 찾으면 커밋 메시지 **본문(body)**에 이슈 참조를 추가한다.
+- 단순 관련: `Related to #N`
+- 해당 커밋으로 이슈가 해결되면: `Closes #N` (자동 종료가 필요 없으면 `Related to #N` 사용)
+- 이슈를 못 찾으면 본문 없이 제목(subject)만으로 커밋한다.
+
+**연결된 커밋 메시지 예시:**
+```
+feat(Card): 카드 뒤집기 애니메이션 추가
+
+Closes #42
+```
+
 ### 4단계: 커밋 계획 확인
  
-사용자에게 아래 형식으로 전체 계획을 보여주고 **반드시 확인**받는다.
+사용자에게 아래 형식으로 전체 계획을 보여주고 **반드시 확인**받는다.  
+탐색된 관련 이슈가 있으면 함께 표시한다.
  
 ```
 총 N개의 커밋을 생성합니다.
@@ -128,9 +154,11 @@ refactor(Manager): 게임 매니저 싱글톤 구조 개선
   - src/components/CardForm.tsx
   - src/api/card.ts
   - src/components/CardForm.test.tsx
+  🔗 관련 이슈: #42 (Closes)
  
 [2/N] chore(config): ESLint 규칙 업데이트
   - .eslintrc.js
+  🔗 관련 이슈: 없음
  
 진행할까요?
 ```
@@ -145,8 +173,11 @@ refactor(Manager): 게임 매니저 싱글톤 구조 개선
 # 해당 그룹 파일만 stage
 git add <file1> <file2> ...
  
-# 커밋
+# 커밋 (관련 이슈가 없을 때)
 git commit -m "<type>(<scope>): <subject>"
+ 
+# 커밋 (관련 이슈가 있을 때 — 두 번째 -m이 본문/이슈 참조)
+git commit -m "<type>(<scope>): <subject>" -m "Closes #N"
 ```
  
 각 커밋 후 성공 여부를 확인하고 다음 그룹으로 진행한다.  
@@ -184,4 +215,5 @@ push할까요?
  
 - Git 저장소 초기화 완료
 - 커밋할 변경사항 존재 (staged 또는 unstaged)
+- 이슈 탐색·연결 기능 사용 시: `gh` CLI 설치 및 인증 완료 (미설치/미인증이면 이슈 탐색을 건너뛰고 이슈 연결 없이 커밋)
  
