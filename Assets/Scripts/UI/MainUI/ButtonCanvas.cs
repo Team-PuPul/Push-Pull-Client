@@ -14,7 +14,7 @@ public class ButtonCanvas : MonoBehaviour
         }
     }
     [SerializeField] private bool isMainCanva = false;
-    [SerializeField] private float fadeDuration = 0.2f;
+    [SerializeField] protected float fadeDuration = 0.2f;
     [SerializeField] private Button firstSelectButton;
 
     private CanvasGroup canvasGroup;
@@ -41,7 +41,7 @@ public class ButtonCanvas : MonoBehaviour
     }
 
     // 캔버스를 활성화시키고 효과 및 선택 버튼을 설정
-    public void EnableCanvas()
+    public virtual void EnableCanvas()
     {
         SelectButton();
         canvas.enabled = true;
@@ -69,7 +69,7 @@ public class ButtonCanvas : MonoBehaviour
     }
 
     // 캔버스를 비활성화 시키고 알파를 0으로 바꿈
-    public void DisableCanvas()
+    public virtual void DisableCanvas()
     {
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
