@@ -23,6 +23,10 @@ public class PauseCanvas : ButtonCanvas
 
     private void BackgroundFade(float value)
     {
-        backgroundCanvasGroup.DOFade(value, fadeDuration);
+        // 인스펙터 미할당 시 NullReferenceException 방지
+        if (backgroundCanvasGroup != null)
+        {
+            backgroundCanvasGroup.DOFade(value, fadeDuration);
+        }
     }
 }
