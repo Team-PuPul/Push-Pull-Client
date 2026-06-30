@@ -1,11 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(
-    fileName = "EndPoint",
-    menuName = "PushPull/Server/End Point",
-    order = 0
-)]
+[CreateAssetMenu(fileName = "EndPoint", menuName = "PushPull/Server/End Point", order = 0)]
 public sealed class EndPointSO : ScriptableObject
 {
     [Header("Server")]
