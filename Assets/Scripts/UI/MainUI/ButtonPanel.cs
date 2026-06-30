@@ -25,7 +25,8 @@ public class ButtonPanel : MonoBehaviour
 
     private void Start()
     {
-        if(!baseEnabled) DisablePanel();
+        if (!baseEnabled) DisablePanel();
+        else EnablePanel();
     }
 
     private void Update()

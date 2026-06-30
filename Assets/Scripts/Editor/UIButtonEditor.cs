@@ -8,6 +8,8 @@ public class UIButtonEditor : ButtonEditor
 {
     // 프로퍼티 변수들
     SerializedProperty soundInfoProp;
+    SerializedProperty useTextColorTransitionProp;
+    SerializedProperty targetTextProp;
     SerializedProperty typeProp;
     SerializedProperty disableObjectProp;
     SerializedProperty enableObjectProp;
@@ -19,6 +21,8 @@ public class UIButtonEditor : ButtonEditor
         base.OnEnable();
         // 실제 UIButton 클래스의 변수명과 일치해야 합니다.
         soundInfoProp = serializedObject.FindProperty("soundInfo");
+        useTextColorTransitionProp = serializedObject.FindProperty("useTextColorTransition");
+        targetTextProp = serializedObject.FindProperty("targetText");
         disableObjectProp = serializedObject.FindProperty("disableCanvas");
         enableObjectProp = serializedObject.FindProperty("enableCanvas");
         disablePanelProp = serializedObject.FindProperty("disablePanel");
@@ -34,6 +38,18 @@ public class UIButtonEditor : ButtonEditor
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Sound Settings", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(soundInfoProp);
+
+        // 텍스트 색 전환 설정 — 기능을 켰을 때만 Target Text 필드를 노출한다.
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Text Settings", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(useTextColorTransitionProp, new GUIContent("Use Text Color Transition"));
+        if (useTextColorTransitionProp.boolValue)
+        {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(targetTextProp, new GUIContent("Target Text"));
+            EditorGUILayout.HelpBox("비워두면 자식에서 TMP_Text를 자동으로 찾습니다.", MessageType.None);
+            EditorGUI.indentLevel--;
+        }
 
         // 2. 버튼 타입 및 타입별 특수 설정
         EditorGUILayout.Space();
