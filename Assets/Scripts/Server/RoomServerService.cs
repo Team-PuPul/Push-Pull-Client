@@ -33,11 +33,7 @@ public sealed class RoomServerService : MonoBehaviour
             apiConnector = gameObject.AddComponent<APIConnector>();
     }
 
-    public void CreateRoom(
-        long lobbyId,
-        Action<string> onSuccess,
-        Action<string> onError
-    )
+    public void CreateRoom(long lobbyId, Action<string> onSuccess, Action<string> onError)
     {
         if (!TryGetConnector(onError))
             return;
@@ -47,7 +43,7 @@ public sealed class RoomServerService : MonoBehaviour
             LobbyId = lobbyId,
             RoomName = DefaultRoomName,
             IsPrivate = true,
-            Password = null
+            Password = null,
         };
 
         apiConnector.Post<CommonApiResponse<CreateRoomResponse>>(
@@ -72,11 +68,7 @@ public sealed class RoomServerService : MonoBehaviour
         );
     }
 
-    public void JoinRoom(
-        string roomCode,
-        Action<long> onSuccess,
-        Action<string> onError
-    )
+    public void JoinRoom(string roomCode, Action<long> onSuccess, Action<string> onError)
     {
         if (!TryGetConnector(onError))
             return;
@@ -96,7 +88,7 @@ public sealed class RoomServerService : MonoBehaviour
         JoinRoomRequest request = new JoinRoomRequest
         {
             RoomCode = normalizedCode,
-            Password = null
+            Password = null,
         };
 
         apiConnector.Post<CommonApiResponse<JoinRoomResponse>>(
@@ -121,11 +113,7 @@ public sealed class RoomServerService : MonoBehaviour
         );
     }
 
-    public void GetRoom(
-        string roomCode,
-        Action<GetRoomResponse> onSuccess,
-        Action<string> onError
-    )
+    public void GetRoom(string roomCode, Action<GetRoomResponse> onSuccess, Action<string> onError)
     {
         if (!TryGetConnector(onError))
             return;
@@ -218,6 +206,11 @@ public sealed class RoomServerService : MonoBehaviour
         ExitCurrentRoom(onComplete, _ => onComplete?.Invoke());
     }
 
+    public void ResetLocalState()
+    {
+        ClearRoomState();
+    }
+
     private bool TryGetConnector(Action<string> onError)
     {
         if (apiConnector == null)
@@ -226,9 +219,7 @@ public sealed class RoomServerService : MonoBehaviour
         if (apiConnector != null && apiConnector.Endpoints != null)
             return true;
 
-        onError?.Invoke(
-            "RoomServerService에 APIConnector 또는 EndPointSO가 연결되지 않았습니다."
-        );
+        onError?.Invoke("RoomServerService에 APIConnector 또는 EndPointSO가 연결되지 않았습니다.");
         return false;
     }
 
@@ -284,8 +275,9 @@ public sealed class RoomServerService : MonoBehaviour
 
         try
         {
-            CommonApiResponse<object> response =
-                JsonConvert.DeserializeObject<CommonApiResponse<object>>(body);
+            CommonApiResponse<object> response = JsonConvert.DeserializeObject<
+                CommonApiResponse<object>
+            >(body);
 
             if (!string.IsNullOrWhiteSpace(response?.Message))
                 return response.Message;
