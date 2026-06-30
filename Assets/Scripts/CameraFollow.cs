@@ -32,20 +32,17 @@ public class CameraFollow : MonoBehaviour
         if (target == null)
             return;
 
+        // Lerp(a, b, smooth * deltaTime)은 프레임레이트에 따라 추종 속도가 달라져
+        // 떨림/끊김의 원인이 된다. 1 - exp(-smooth * deltaTime)을 보간 계수로 쓰면
+        // 어떤 프레임레이트에서도 동일한 추종 속도를 보장한다.
         Vector3 mouseOffset = GetMouseOffset();
-        currentMouseOffset = Vector3.Lerp(
-            currentMouseOffset,
-            mouseOffset,
-            mouseLookSmooth * Time.deltaTime
-        );
+        float mouseT = 1f - Mathf.Exp(-mouseLookSmooth * Time.deltaTime);
+        currentMouseOffset = Vector3.Lerp(currentMouseOffset, mouseOffset, mouseT);
 
         Vector3 targetPosition = target.position + baseOffset + currentMouseOffset;
 
-        transform.position = Vector3.Lerp(
-            transform.position,
-            targetPosition,
-            followSmooth * Time.deltaTime
-        );
+        float followT = 1f - Mathf.Exp(-followSmooth * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, followT);
     }
 
     private Vector3 GetMouseOffset()
