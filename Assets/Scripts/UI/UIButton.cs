@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
 using TMPro;
-using UnityEditor.Tilemaps;
 
 public class UIButton : Button
 {
@@ -72,7 +71,12 @@ public class UIButton : Button
         if (targetText == null)
         {
             targetText = GetComponentInChildren<TMP_Text>(true);
-            if (targetText == null) return;
+            // 끝내 찾지 못하면 기능을 꺼 매 상태 전환마다 GetComponentInChildren가 반복 호출되는 것을 막는다.
+            if (targetText == null)
+            {
+                useTextColorTransition = false;
+                return;
+            }
         }
 
         // Color Tint 트랜지션이 아닐 때는 색을 건드리지 않는다.

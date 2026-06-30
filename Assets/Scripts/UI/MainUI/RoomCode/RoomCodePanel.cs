@@ -7,7 +7,8 @@ public class RoomCodePanel : ButtonPanel
 
     public override void EnablePanel()
     {
-        roomCodeField.text = "";
+        // 인스펙터 할당 누락 등으로 인한 NullReferenceException 방지
+        if (roomCodeField != null) roomCodeField.text = "";
         base.EnablePanel();
     }
 }

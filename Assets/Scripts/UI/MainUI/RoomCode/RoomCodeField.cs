@@ -53,8 +53,10 @@ public class RoomCodeField : TMP_InputField
     {
         if (startButton == null) return;
 
-        // 1자 이상 6자 이하일 때만 시작 버튼을 활성화한다.
-        bool isValid = value.Length > 0 && value.Length <= 6;
+        // 앞뒤 공백을 제거한 실제 입력 값이 1자 이상 6자 이하일 때만 시작 버튼을 활성화한다.
+        // (공백만 입력해도 활성화되는 것을 방지)
+        string trimmed = value?.Trim() ?? string.Empty;
+        bool isValid = trimmed.Length > 0 && trimmed.Length <= 6;
 
         // interactable을 직접 끄면 버튼이 네비게이션 대상에서 제외되어 방향키 이동이 끊긴다.
         // 따라서 네비게이션은 유지하면서 시각적 비활성화 + 입력 차단만 적용하는 잠금 토글을 사용한다.
