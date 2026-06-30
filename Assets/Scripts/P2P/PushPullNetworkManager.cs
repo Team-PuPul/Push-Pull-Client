@@ -5,6 +5,16 @@ using UnityEngine;
 
 public class PushPullNetworkManager : NetworkManager
 {
+    private const string MainMenuScenePath =
+        "Assets/Scenes/InGameScenes/UI/MainUI.unity";
+    private const string WaitingRoomScenePath =
+        "Assets/Scenes/InGameScenes/WaitingRoom.unity";
+
+    [Header("Network Capacity")]
+    [SerializeField]
+    [Range(2, 4)]
+    private int supportedMaxConnections = 4;
+
     [Header("Player Prefabs")]
     [SerializeField]
     private GameObject blackPlayerPrefab;
@@ -15,6 +25,23 @@ public class PushPullNetworkManager : NetworkManager
 
     [SerializeField]
     private string blackSpawnName = "BlackStartPoint";
+
+    public override void Awake()
+    {
+        // MainUI에서 네트워크를 시작하고, 연결 성공 후 Mirror가 WaitingRoom을 로드한다.
+        if (string.IsNullOrWhiteSpace(offlineScene))
+            offlineScene = MainMenuScenePath;
+
+        if (string.IsNullOrWhiteSpace(onlineScene))
+            onlineScene = WaitingRoomScenePath;
+
+        dontDestroyOnLoad = true;
+        // 현재 협동 방은 2명이지만, NetworkManager 자체는 향후 PVP를 위해 4명까지 허용한다.
+        maxConnections = supportedMaxConnections;
+        autoCreatePlayer = true;
+
+        base.Awake();
+    }
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
@@ -55,7 +82,7 @@ public class PushPullNetworkManager : NetworkManager
             return blackPlayerPrefab;
 
         Debug.LogWarning(
-            "[PushPullNetworkManager] blackPlayerPrefab�� ����־ �⺻ playerPrefab�� ����մϴ�."
+            "[PushPullNetworkManager] blackPlayerPrefab이 비어있어서 기본 playerPrefab을 사용합니다."
         );
 
         return playerPrefab;
