@@ -140,6 +140,9 @@ MonoBehaviour:
   roomCodeInput: {fileID: 0}
   createdRoomCodeText: {fileID: 6984357403053260080}
   statusText: {fileID: 0}
+  copyRoomCodeButton: {fileID: 0}
+  copyFeedbackText: {fileID: 0}
+  copyFeedbackDuration: 2
 --- !u!114 &5477640344685212036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -625,7 +628,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: e7f1cd08c3aa3cc429808f1bb5b3a823, type: 3}
-  m_Type: 0
+  m_Type: 2
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -633,7 +636,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2.75
 --- !u!114 &1676808093315459541
 MonoBehaviour:
   m_ObjectHideFlags: 0
