@@ -3,10 +3,15 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+using TMPro;
+using UnityEditor.Tilemaps;
 
 public class UIButton : Button
 {
     [SerializeField] protected UISoundInfo soundInfo;
+
+    [SerializeField] private bool useTextColorTransition = false;   // 버튼 상태에 따라 내부 텍스트 색도 전환할지 여부
+    [SerializeField] private TMP_Text targetText;                   // 버튼 상태(색) 전환을 함께 따라갈 내부 텍스트
 
     [SerializeField] private ButtonCanvas disableCanvas;        // 비활성화 할(보이지 않게 할 캔버스) 오브젝트
     [SerializeField] private  ButtonCanvas enableCanvas;        // 활성화 할(보이게 할 캔버스) 오브젝트
@@ -19,6 +24,21 @@ public class UIButton : Button
     // 같은 버튼이 직전과 동일하게 재선택될 때 호버 사운드 중복 재생을 막기 위한 가드
     private static UIButton _lastHovered;
 
+    // 네비게이션은 유지하되(interactable=true) 클릭/서브밋만 막는 잠금 상태.
+    // interactable을 직접 끄면 Selectable이 네비게이션 대상에서 제외되어
+    // 방향키/게임패드 이동 경로가 끊기므로, 시각적 비활성화 + 입력 차단으로 대체한다.
+    private bool _interactableLocked;
+
+    // 외부에서 잠금 상태를 토글한다. interactable은 건드리지 않으므로 네비게이션은 그대로 유지된다.
+    public void SetInteractableLock(bool locked)
+    {
+        if (_interactableLocked == locked) return;
+        _interactableLocked = locked;
+
+        // 잠금 상태 변화에 맞춰 즉시 비주얼을 갱신한다.
+        DoStateTransition(currentSelectionState, false);
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -27,6 +47,49 @@ public class UIButton : Button
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }
+
+        // 텍스트 색 전환을 쓸 때만, 인스펙터에서 비워두면 자식에서 자동으로 찾아 둔다.
+        if (useTextColorTransition && targetText == null)
+        {
+            targetText = GetComponentInChildren<TMP_Text>(true);
+        }
+    }
+
+    // 버튼 상태(Normal/Highlighted/Pressed/Selected/Disabled)가 바뀔 때마다 호출된다.
+    // 기본 Selectable은 targetGraphic 하나만 틴트하므로, 내부 TMP에도 같은 색을 적용해
+    // isInteractable이 꺼지면 텍스트도 비활성화 색을 따라가도록 한다.
+    protected override void DoStateTransition(SelectionState state, bool instant)
+    {
+        // 잠금 상태에서는 항상 Disabled 비주얼로 강제한다(클릭은 OnPointerClick/OnSubmit에서 차단).
+        if (_interactableLocked) state = SelectionState.Disabled;
+
+        base.DoStateTransition(state, instant);
+
+        // 텍스트 색 전환 기능이 꺼져 있으면 아무것도 하지 않는다.
+        if (!useTextColorTransition) return;
+
+        // DoStateTransition은 Start보다 먼저 호출될 수 있어 lazy 가드를 둔다.
+        if (targetText == null)
+        {
+            targetText = GetComponentInChildren<TMP_Text>(true);
+            if (targetText == null) return;
+        }
+
+        // Color Tint 트랜지션이 아닐 때는 색을 건드리지 않는다.
+        if (transition != Transition.ColorTint) return;
+
+        // 텍스트 색은 활성(Normal)/비활성(Disabled) 상태에서만 전환한다.
+        // Highlighted/Pressed/Selected 등 나머지 상태에서는 색을 바꾸지 않고 normalColor를 유지한다.
+        Color targetColor = state == SelectionState.Disabled
+            ? colors.disabledColor
+            : colors.normalColor;
+
+        // colorMultiplier를 곱해 기존 targetGraphic 전환과 톤을 맞춘다.
+        targetText.CrossFadeColor(
+            targetColor * colors.colorMultiplier,
+            instant ? 0f : colors.fadeDuration,
+            true,   // ignoreTimeScale
+            true);  // useAlpha
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
@@ -62,6 +125,7 @@ public class UIButton : Button
     // 호버 사운드 단일 진입점
     private void PlayHover()
     {
+        if (_interactableLocked) return;    // 잠금(비활성 표시) 상태에서는 호버 사운드 무음
         if (_lastHovered == this) return;   // 같은 버튼 연속 재선택 시 무음
         _lastHovered = this;
 
@@ -79,6 +143,8 @@ public class UIButton : Button
     {
         // 리바인딩 진행 중에는 버튼이 눌리지 않도록 무시
         if (RebindingManager.IsRebinding) return;
+        // 잠금 상태에서는 클릭을 무시 (비활성처럼 동작)
+        if (_interactableLocked) return;
 
         base.OnPointerClick(eventData);
         PlayClick();
@@ -87,6 +153,8 @@ public class UIButton : Button
     public override void OnSubmit(BaseEventData eventData)
     {
         if (RebindingManager.IsRebinding) return;
+        // 잠금 상태에서는 서브밋을 무시 (비활성처럼 동작)
+        if (_interactableLocked) return;
 
         base.OnSubmit(eventData);
         PlayClick();
