@@ -5,10 +5,9 @@ using UnityEngine;
 
 public class PushPullNetworkManager : NetworkManager
 {
-    private const string MainMenuScenePath =
-        "Assets/Scenes/InGameScenes/UI/MainUI.unity";
-    private const string WaitingRoomScenePath =
-        "Assets/Scenes/InGameScenes/WaitingRoom.unity";
+    private const string MainMenuScenePath = "Assets/Scenes/InGameScenes/UI/MainUI.unity";
+
+    private const string WaitingRoomScenePath = "Assets/Scenes/InGameScenes/WaitingRoom.unity";
 
     [Header("Network Capacity")]
     [SerializeField]
@@ -28,7 +27,8 @@ public class PushPullNetworkManager : NetworkManager
 
     public override void Awake()
     {
-        // MainUI에서 네트워크를 시작하고, 연결 성공 후 Mirror가 WaitingRoom을 로드한다.
+        // MainUI에서 네트워크를 시작하고,
+        // 연결 성공 후 Mirror가 WaitingRoom을 로드한다.
         if (string.IsNullOrWhiteSpace(offlineScene))
             offlineScene = MainMenuScenePath;
 
@@ -36,29 +36,46 @@ public class PushPullNetworkManager : NetworkManager
             onlineScene = WaitingRoomScenePath;
 
         dontDestroyOnLoad = true;
-        // 현재 협동 방은 2명이지만, NetworkManager 자체는 향후 PVP를 위해 4명까지 허용한다.
+
+        // 현재 협동 방은 2명이지만,
+        // NetworkManager 자체는 향후 PVP를 위해 4명까지 허용한다.
         maxConnections = supportedMaxConnections;
         autoCreatePlayer = true;
 
         base.Awake();
     }
 
+    public override void OnClientDisconnect()
+    {
+        // 호스트의 로컬 클라이언트 종료가 아니라
+        // 원격 호스트와 연결이 끊긴 게스트만 처리한다.
+        if (!NetworkServer.active)
+        {
+            SteamLobby steamLobby = GetComponent<SteamLobby>();
+            steamLobby?.HandleUnexpectedClientDisconnect();
+        }
+
+        base.OnClientDisconnect();
+    }
+
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         Transform startPosition = GetStartPosition();
-
         GameObject selectedPrefab = GetPlayerPrefabForConnection(conn);
 
         Vector3 spawnPosition = startPosition != null ? startPosition.position : Vector3.zero;
+
         Quaternion spawnRotation =
             startPosition != null ? startPosition.rotation : Quaternion.identity;
 
         GameObject player = Instantiate(selectedPrefab, spawnPosition, spawnRotation);
+
         NetworkServer.AddPlayerForConnection(conn, player);
 
         Debug.Log(
             $"[PushPullNetworkManager] Add player. "
-                + $"connectionId={conn.connectionId}, prefab={selectedPrefab.name}"
+                + $"connectionId={conn.connectionId}, "
+                + $"prefab={selectedPrefab.name}"
         );
     }
 
@@ -82,7 +99,8 @@ public class PushPullNetworkManager : NetworkManager
             return blackPlayerPrefab;
 
         Debug.LogWarning(
-            "[PushPullNetworkManager] blackPlayerPrefab이 비어있어서 기본 playerPrefab을 사용합니다."
+            "[PushPullNetworkManager] blackPlayerPrefab이 비어있어서 "
+                + "기본 playerPrefab을 사용합니다."
         );
 
         return playerPrefab;
@@ -93,7 +111,8 @@ public class PushPullNetworkManager : NetworkManager
         base.OnServerSceneChanged(sceneName);
 
         Debug.Log(
-            $"[PushPullNetworkManager] OnServerSceneChanged scene={sceneName}, isServer={NetworkServer.active}"
+            $"[PushPullNetworkManager] OnServerSceneChanged "
+                + $"scene={sceneName}, isServer={NetworkServer.active}"
         );
 
         if (!sceneName.StartsWith("Stage"))
@@ -113,8 +132,10 @@ public class PushPullNetworkManager : NetworkManager
             {
                 Debug.LogError(
                     $"[PushPullNetworkManager] Player identity wait timeout. "
-                        + $"connectionCount={NetworkServer.connections.Count}, isServer={NetworkServer.active}"
+                        + $"connectionCount={NetworkServer.connections.Count}, "
+                        + $"isServer={NetworkServer.active}"
                 );
+
                 yield break;
             }
 
@@ -150,9 +171,12 @@ public class PushPullNetworkManager : NetworkManager
         {
             Debug.LogError(
                 $"[PushPullNetworkManager] Stage spawn points not found. "
-                    + $"white={whiteSpawn != null}, black={blackSpawn != null}, "
-                    + $"isServer={NetworkServer.active}, isClient={NetworkClient.active}"
+                    + $"white={whiteSpawn != null}, "
+                    + $"black={blackSpawn != null}, "
+                    + $"isServer={NetworkServer.active}, "
+                    + $"isClient={NetworkClient.active}"
             );
+
             return;
         }
 
@@ -175,8 +199,10 @@ public class PushPullNetworkManager : NetworkManager
             {
                 Debug.LogWarning(
                     $"[PushPullNetworkManager] Player identity is null. "
-                        + $"connectionId={connection.connectionId}, isServer={NetworkServer.active}"
+                        + $"connectionId={connection.connectionId}, "
+                        + $"isServer={NetworkServer.active}"
                 );
+
                 continue;
             }
 
@@ -185,14 +211,20 @@ public class PushPullNetworkManager : NetworkManager
             NetworkTransformBase networkTransform = player.GetComponent<NetworkTransformBase>();
 
             if (networkTransform != null)
+            {
                 networkTransform.ServerTeleport(spawn.position, spawn.rotation);
+            }
             else
+            {
                 player.transform.SetPositionAndRotation(spawn.position, spawn.rotation);
+            }
 
             Debug.Log(
                 $"[PushPullNetworkManager] Move player to spawn. "
-                    + $"connectionId={connection.connectionId}, player={player.name}, "
-                    + $"spawn={spawn.name}, position={spawn.position}"
+                    + $"connectionId={connection.connectionId}, "
+                    + $"player={player.name}, "
+                    + $"spawn={spawn.name}, "
+                    + $"position={spawn.position}"
             );
         }
     }
@@ -200,6 +232,7 @@ public class PushPullNetworkManager : NetworkManager
     private Transform FindSpawnPoint(string spawnName)
     {
         GameObject spawnObject = GameObject.Find(spawnName);
+
         return spawnObject != null ? spawnObject.transform : null;
     }
 }
