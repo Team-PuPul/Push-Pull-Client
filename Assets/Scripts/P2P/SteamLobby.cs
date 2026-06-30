@@ -122,7 +122,17 @@ public class SteamLobby : MonoBehaviour
                 ReportStatus("Steam 로비에 입장하는 중입니다...");
                 SteamMatchmaking.JoinLobby(new CSteamID((ulong)steamLobbyId));
             },
-            ReportError
+            error =>
+            {
+                if (IsRoomNotFoundError(error))
+                {
+                    // TODO: 방 코드 오류 전용 안내 UI가 개발되면 임시 경고 처리를 교체한다.
+                    ReportWarning(error);
+                    return;
+                }
+
+                ReportError(error);
+            }
         );
     }
 
@@ -322,11 +332,25 @@ public class SteamLobby : MonoBehaviour
         StatusChanged?.Invoke(message);
     }
 
+    private void ReportWarning(string message)
+    {
+        operationInProgress = false;
+        CurrentStatus = message;
+        Debug.LogWarning($"[SteamLobby] {message}");
+        StatusChanged?.Invoke(message);
+    }
+
     private void ReportError(string message)
     {
         operationInProgress = false;
         CurrentStatus = message;
         Debug.LogError($"[SteamLobby] {message}");
         ErrorOccurred?.Invoke(message);
+    }
+
+    private static bool IsRoomNotFoundError(string message)
+    {
+        return !string.IsNullOrWhiteSpace(message)
+            && message.StartsWith("ROOM_NOT_FOUND", StringComparison.OrdinalIgnoreCase);
     }
 }
