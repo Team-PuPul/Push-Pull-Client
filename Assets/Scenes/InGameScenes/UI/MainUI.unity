@@ -1225,7 +1225,7 @@ GameObject:
   - component: {fileID: 183595303}
   - component: {fileID: 183595302}
   m_Layer: 5
-  m_Name: Apply
+  m_Name: JoinButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1295,9 +1295,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7441688079832766103}
-        m_TargetAssemblyTypeName: VideoSettingPanel, Assembly-CSharp
-        m_MethodName: SetScreenSize
+      - m_Target: {fileID: 994916238}
+        m_TargetAssemblyTypeName: RoomCodeUIController, Assembly-CSharp
+        m_MethodName: JoinRoom
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6011,6 +6011,7 @@ GameObject:
   - component: {fileID: 994916232}
   - component: {fileID: 994916236}
   - component: {fileID: 994916237}
+  - component: {fileID: 994916238}
   m_Layer: 5
   m_Name: MultiCanvas
   m_TagString: Untagged
@@ -6129,6 +6130,22 @@ MonoBehaviour:
   isMainCanva: 0
   fadeDuration: 0.2
   firstSelectButton: {fileID: 1520569060}
+--- !u!114 &994916238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 994916231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13e4642eebe73934bbc034a813f71781, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steamLobby: {fileID: 1278870447}
+  roomCodeInput: {fileID: 958677173}
+  createdRoomCodeText: {fileID: 0}
+  statusText: {fileID: 0}
 --- !u!1 &997670389
 GameObject:
   m_ObjectHideFlags: 0
@@ -7530,6 +7547,74 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1001 &1278870446
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.5030737
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.7150662
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.4681964
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2846702980852010746, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4867739319799543139, guid: c6815753c0315554489a6f683686234d, type: 3}
+      propertyPath: m_Name
+      value: NetworkManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c6815753c0315554489a6f683686234d, type: 3}
+--- !u!114 &1278870447 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8301366195336883472, guid: c6815753c0315554489a6f683686234d, type: 3}
+  m_PrefabInstance: {fileID: 1278870446}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd58e7649c2612e4899d35aaa6edec9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1412850201
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7837,13 +7922,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 994916238}
+        m_TargetAssemblyTypeName: RoomCodeUIController, Assembly-CSharp
+        m_MethodName: CreateRoom
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -8889,7 +8974,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC801\uC6A9"
+  m_text: "\uCC38\uAC00"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 06a5183d6cb1bc94d93f6a3160834ae2, type: 2}
   m_sharedMaterial: {fileID: 45190524296822444, guid: 06a5183d6cb1bc94d93f6a3160834ae2, type: 2}
@@ -10111,17 +10196,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
---- !u!114 &7441688079832766103 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3167783186587687968, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
-  m_PrefabInstance: {fileID: 7441688079832766102}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca4dd9208d077df4a8cedb1a1be58858, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &7441688079832766106 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5680333736842055536, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
@@ -10368,6 +10442,7 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1278870446}
   - {fileID: 417322893}
   - {fileID: 2002665542}
   - {fileID: 994916235}
