@@ -701,6 +701,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61a31fc49cb2bbc44b4f29ca2f91fdd5, type: 3}
+--- !u!1 &678899828 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7971364535610884156, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
+  m_PrefabInstance: {fileID: 688818061}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &687674648
 GameObject:
   m_ObjectHideFlags: 0
@@ -828,10 +833,21 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2072212288}
+    - target: {fileID: 2549910329290019456, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
+      propertyPath: m_Name
+      value: RoomCodeText
+      objectReference: {fileID: 0}
+    - target: {fileID: 7971364535610884156, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1237121039777783422, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1217872512}
   m_SourcePrefab: {fileID: 100100000, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
 --- !u!1 &757629301
 GameObject:
@@ -1300,6 +1316,24 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb26b8b73e63be3408c70cc290d8099c, type: 3}
+--- !u!1 &1217872505 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1237121039777783422, guid: e6e0e16a6f5e9c24c837b2b130786b11, type: 3}
+  m_PrefabInstance: {fileID: 688818061}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1217872512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217872505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ace69631b32fce4abfcd31ff3202252, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameStartButton: {fileID: 678899828}
 --- !u!1 &1246315600
 GameObject:
   m_ObjectHideFlags: 0

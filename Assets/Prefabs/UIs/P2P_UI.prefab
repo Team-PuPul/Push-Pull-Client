@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2261424562935984449}
   - component: {fileID: 3331874404484703725}
   - component: {fileID: 2730106299580508606}
+  - component: {fileID: 5477640344685212036}
   m_Layer: 5
   m_Name: P2P_UI
   m_TagString: Untagged
@@ -139,6 +140,19 @@ MonoBehaviour:
   roomCodeInput: {fileID: 0}
   createdRoomCodeText: {fileID: 6984357403053260080}
   statusText: {fileID: 0}
+--- !u!114 &5477640344685212036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237121039777783422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ace69631b32fce4abfcd31ff3202252, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameStartButton: {fileID: 7971364535610884156}
 --- !u!1 &2549910329290019456
 GameObject:
   m_ObjectHideFlags: 0
@@ -151,7 +165,7 @@ GameObject:
   - component: {fileID: 3188127293915282868}
   - component: {fileID: 4150766560305357207}
   m_Layer: 5
-  m_Name: RoomCode (1)
+  m_Name: RoomCodeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
