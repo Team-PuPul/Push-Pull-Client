@@ -233,14 +233,23 @@ public class InputPlayer : NetworkBehaviour
 
         if (GrabGlove != null && !GrabGlove.grabing)
             UpdateGrabRotation();
+    }
 
-        // 좌우 이동은 물리(velocity)가 아니라 transform을 직접 옮기는 방식이라
-        // FixedUpdate(50Hz)에 둘 필요가 없다. 렌더 프레임마다 처리해야 카메라 추적 시
-        // 50Hz 단위로 끊겨 보이는 잔상/떨림이 사라진다. 점프·푸시 넉백(AddForce)은
-        // 그대로 물리(Rigidbody2D)에 맡겨 손맛을 유지한다.
+    private void FixedUpdate()
+    {
+        if (!isLocalPlayer)
+            return;
+        if (Time.timeScale == 0f)
+            return;
+        if (cantMove)
+            return;
+
+        // 좌우 이동(transform.Translate)은 점프의 velocity(중력/AddForce) 적분과
+        // 같은 물리 스텝 안에서 합쳐져야 올바르게 동작하므로 FixedUpdate에서 처리한다.
+        // 화면상의 끊김은 Rigidbody2D Interpolation = Interpolate로 보간해 해결한다.
         if (moving)
         {
-            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.deltaTime, 0f, 0f);
+            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f, 0f);
             transform.Translate(move);
         }
 
