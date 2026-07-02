@@ -2,14 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(75)]
 public class Line : MonoBehaviour
 {
     LineRenderer line;
+    PlayerVisualInterpolator visualInterpolator;
     public Transform TargetGO;
 
     private void Awake()
     {
         line = GetComponent<LineRenderer>();
+        visualInterpolator = GetComponentInParent<PlayerVisualInterpolator>();
         //TargetGO = transform.Find("LinePos");
     }
 
@@ -18,9 +21,12 @@ public class Line : MonoBehaviour
         line.positionCount = 2;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        line.SetPosition(0, TargetGO.transform.position);
-        line.SetPosition(1, gameObject.transform.position);
+        Vector3 visualOffset =
+            visualInterpolator != null ? visualInterpolator.VisualOffset : Vector3.zero;
+
+        line.SetPosition(0, TargetGO.position + visualOffset);
+        line.SetPosition(1, transform.position + visualOffset);
     }
 }
