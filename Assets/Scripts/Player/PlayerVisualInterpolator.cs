@@ -38,6 +38,11 @@ public class PlayerVisualInterpolator : NetworkBehaviour
 
     public Transform CameraTarget => visualRoot != null ? visualRoot : transform;
 
+    public Vector3 VisualOffset =>
+        isLocalPlayer && visualRoot != null
+            ? visualRoot.position - transform.position
+            : Vector3.zero;
+
     private void Awake()
     {
         propertyBlock = new MaterialPropertyBlock();
