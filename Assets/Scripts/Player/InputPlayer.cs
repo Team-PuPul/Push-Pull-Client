@@ -40,6 +40,29 @@ public class InputPlayer : NetworkBehaviour
     public bool cantMove = false;
     public bool jumpAble = true;
 
+    [Header("Knockback")]
+    // 밀기 넉백(AddForce Impulse) 직후, 이동 코드가 velocity.x를 덮어써
+    // 외부 힘을 지워버리는 것을 막기 위한 락아웃 시간(초).
+    [SerializeField]
+    private float knockbackLockoutDuration = 0.25f;
+
+    // 이 시각 이전까지는 무조건 이동 코드가 velocity를 건드리지 않는다(최소 보장 시간).
+    private float knockbackLockoutUntil = 0f;
+
+    // 넉백 비행 중 여부. 최소 시간이 지나도 공중에 떠 있는 동안에는 제어를 돌려주지
+    // 않는다(입력 없이 날아가다 공중에서 뚝 멈추는 현상 방지). 착지하거나
+    // 이동 입력이 들어오면 종료되어 조작감을 되찾는다.
+    private bool knockbackActive = false;
+
+    // 넉백 해제 직후 velocity.x를 목표 속도로 즉시 대입하면 넉백 속도(예: 20)에서
+    // 걷기 속도(4)로 한 스텝 만에 꺾여 순간이동처럼 보인다. 이 가속도로
+    // MoveTowards 블렌딩해 자연스럽게 수렴시킨다. (단위: 속도/초)
+    [SerializeField]
+    private float knockbackRecoverAccel = 40f;
+
+    // 넉백에서 일반 이동으로 복귀하는 중(속도 블렌딩 구간)
+    private bool knockbackRecovering = false;
+
     [Header("Push / Charge")]
     private float MaxPushCharge = 35f;
     private float ChargeTime = 1f;
@@ -104,12 +127,8 @@ public class InputPlayer : NetworkBehaviour
 
     private bool clearedStarted = false;
 
-    [Header("Moving Surface")]
-    [SerializeField]
-    private float againstPlatformBoost = 0.5f;
-
+    // 현재 밟고 있는 이동 발판(수평·수직 추종 모두 velocity가 담당)
     private IMovingSurface currentMovingSurface;
-    private Vector3 lastMovingSurfacePosition;
 
     private void Awake()
     {
@@ -244,13 +263,44 @@ public class InputPlayer : NetworkBehaviour
         if (cantMove)
             return;
 
-        // 좌우 이동(transform.Translate)은 점프의 velocity(중력/AddForce) 적분과
-        // 같은 물리 스텝 안에서 합쳐져야 올바르게 동작하므로 FixedUpdate에서 처리한다.
-        // 화면상의 끊김은 Rigidbody2D Interpolation = Interpolate로 보간해 해결한다.
-        if (moving)
+        // 좌우 이동을 rb.velocity로 처리한다. transform.Translate(텔레포트)는
+        // Rigidbody2D Interpolation이 보간하지 못해 카메라 추종이 지지직거렸기 때문에,
+        // 보간이 정상 동작하는 velocity 기반으로 통일한다. velocity.y(중력/점프)는 그대로
+        // 보존해 물리와 자연스럽게 합쳐지게 한다.
+        //
+        // 단, 넉백(AddForce Impulse) 중에는 velocity를 덮어쓰지 않는다. 매 스텝
+        // velocity를 대입하면 넉백으로 실린 속도가 즉시 지워지기 때문이다
+        // (velocity 방식의 알려진 함정).
+        UpdateKnockbackState();
+
+        if (!knockbackActive)
         {
-            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f, 0f);
-            transform.Translate(move);
+            // 이동 발판 위에서는 발판 속도를 목표 velocity에 반영한다.
+            // - 수평(x): 발판 속도 + 입력 속도. 발판 표면과의 상대 미끄러짐이 걷기
+            //   속도만큼으로 유지되어 마찰로 속도가 깎이지 않는다.
+            // - 수직(y): 접지 중에는 발판의 수직 속도를 그대로 따라간다(상하 발판).
+            //   공중(점프/낙하)에서는 중력이 계산한 velocity.y를 보존한다.
+            bool onMovingSurface = TryGetMovingSurfaceVelocity(out Vector2 surfaceVelocity);
+            float inputVelocityX = moving ? moveInput.x * moveSpeed : 0f;
+            float velocityY = (onMovingSurface && isGrounded) ? surfaceVelocity.y : rb.velocity.y;
+
+            float targetVelocityX = surfaceVelocity.x + inputVelocityX;
+            float newVelocityX = targetVelocityX;
+
+            // 넉백 복귀 중에는 즉시 대입 대신 MoveTowards로 부드럽게 수렴시킨다.
+            if (knockbackRecovering)
+            {
+                newVelocityX = Mathf.MoveTowards(
+                    rb.velocity.x,
+                    targetVelocityX,
+                    knockbackRecoverAccel * Time.fixedDeltaTime
+                );
+
+                if (Mathf.Approximately(newVelocityX, targetVelocityX))
+                    knockbackRecovering = false;
+            }
+
+            rb.velocity = new Vector2(newVelocityX, velocityY);
         }
 
         if (Mathf.Abs(moveInput.x) > flipThreshold && GrabGlove != null && !GrabGlove.grabing)
@@ -271,7 +321,6 @@ public class InputPlayer : NetworkBehaviour
         if (cantMove)
             return;
 
-        ApplyMovingSurfaceCarry();
         UpdateAnimatorParameters();
     }
 
@@ -384,7 +433,15 @@ public class InputPlayer : NetworkBehaviour
         bool groundedForAnimation = isGrounded && Time.time >= ignoreGroundUntilTime;
         float ySpeed = rb != null ? rb.velocity.y : 0f;
 
-        if (groundedForAnimation && Mathf.Abs(ySpeed) <= verticalAnimDeadZone)
+        // 이동 발판 위에서는 발판의 수직 속도가 velocity.y에 실리므로(상하 발판 추종),
+        // 절대 속도로 판정하면 하강 발판에서 Fall ↔ Idle이 매 프레임 번갈아 나온다.
+        // 발판 기준 상대 속도로 판정하고, 발판에 접촉한 채 접지 중이면 속도 추정의
+        // 프레임 지연(발판 정지/반환 순간)과 무관하게 접지 애니메이션을 유지한다.
+        bool onMovingSurface = TryGetMovingSurfaceVelocity(out Vector2 animSurfaceVelocity);
+        if (onMovingSurface)
+            ySpeed -= animSurfaceVelocity.y;
+
+        if (groundedForAnimation && (onMovingSurface || Mathf.Abs(ySpeed) <= verticalAnimDeadZone))
         {
             hasStartedFalling = false;
             SetLocomotionAnimatorState(isMoving, false, false);
@@ -403,7 +460,10 @@ public class InputPlayer : NetworkBehaviour
             hasStartedFalling = false;
             isJumping = true;
         }
-        else if (ySpeed < -verticalAnimDeadZone)
+        // 착지 프레임에는 발 트리거(isGrounded)가 먼저 잡히고 velocity.y에는 아직
+        // 낙하 속도가 남아 있다. 이때 Fall로 판정하면 착지 순간 Fall이 한 프레임
+        // 깜빡이므로, 접지 중에는 낙하 판정을 하지 않는다.
+        else if (ySpeed < -verticalAnimDeadZone && !groundedForAnimation)
         {
             hasStartedFalling = true;
             isFalling = true;
@@ -497,96 +557,41 @@ public class InputPlayer : NetworkBehaviour
         SetAnimatorBool(IsDeadHash, newValue);
     }
 
-    private void ApplyMovingSurfaceCarry()
+    // 현재 밟고 있는 이동 발판의 월드 속도를 얻는다. 발판이 없거나 파괴됐으면 false.
+    // 수평·수직 추종 모두 velocity(FixedUpdate)가 담당하므로 transform 기반 carry는
+    // 더 이상 사용하지 않는다(텔레포트라 Interpolation이 보간하지 못해 떨렸음).
+    private bool TryGetMovingSurfaceVelocity(out Vector2 surfaceVelocity)
     {
+        surfaceVelocity = Vector2.zero;
+
         if (currentMovingSurface == null)
-            return;
+            return false;
 
         if (currentMovingSurface is Object surfaceObject && surfaceObject == null)
         {
             currentMovingSurface = null;
-            return;
+            return false;
         }
 
         if (!currentMovingSurface.CanCarryPlayer)
         {
             currentMovingSurface = null;
-            return;
+            return false;
         }
 
-        Vector3 surfacePosition = currentMovingSurface.CarryPosition;
-        Vector3 surfaceDelta = surfacePosition - lastMovingSurfacePosition;
-
-        Vector3 extraMove = Vector3.zero;
-
-        if (Mathf.Abs(moveInput.x) > 0.01f && Mathf.Abs(surfaceDelta.x) > 0.0001f)
-        {
-            bool movingAgainstPlatform = Mathf.Sign(moveInput.x) != Mathf.Sign(surfaceDelta.x);
-
-            if (movingAgainstPlatform)
-                extraMove.x = moveInput.x * Mathf.Abs(surfaceDelta.x) * againstPlatformBoost;
-        }
-
-        Vector3 carryDelta = surfaceDelta + extraMove;
-
-        if (carryDelta != Vector3.zero)
-            transform.position += carryDelta;
-
-        lastMovingSurfacePosition = surfacePosition;
+        surfaceVelocity = currentMovingSurface.CarryVelocity;
+        return true;
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    // 발판 인식은 NewGroundCheck(발밑 트리거)가 담당한다. 접지 판정과 발판 판정을
+    // 같은 소스(트리거)에서 함께 갱신하므로, collision 콜백과 트리거의 타이밍이
+    // 어긋나던 레이스(착지 프레임 Fall 깜빡임 등)가 원천적으로 사라진다.
+    public void SetMovingSurface(IMovingSurface movingSurface)
     {
         if (!isLocalPlayer)
-            return;
-
-        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
-            return;
-
-        if (!IsGroundContact(collision))
-        {
-            if (ReferenceEquals(currentMovingSurface, movingSurface))
-                currentMovingSurface = null;
-
-            return;
-        }
-
-        if (ReferenceEquals(currentMovingSurface, movingSurface))
             return;
 
         currentMovingSurface = movingSurface;
-        lastMovingSurfacePosition = movingSurface.CarryPosition;
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (!isLocalPlayer)
-            return;
-
-        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
-            return;
-
-        if (ReferenceEquals(currentMovingSurface, movingSurface))
-            currentMovingSurface = null;
-    }
-
-    private bool TryGetMovingSurface(Collision2D collision, out IMovingSurface movingSurface)
-    {
-        movingSurface = collision.collider.GetComponentInParent<IMovingSurface>();
-        return movingSurface != null && movingSurface.CanCarryPlayer;
-    }
-
-    private bool IsGroundContact(Collision2D collision)
-    {
-        for (int i = 0; i < collision.contactCount; i++)
-        {
-            ContactPoint2D contact = collision.GetContact(i);
-
-            if (contact.normal.y > 0.5f)
-                return true;
-        }
-
-        return false;
     }
 
     private void OnAnimChanged(string oldVal, string newVal)
@@ -715,6 +720,42 @@ public class InputPlayer : NetworkBehaviour
 
         Vector2 impulseVector = dir * power + Vector2.up * power / 2f;
         rigid.AddForce(impulseVector, ForceMode2D.Impulse);
+
+        // 밀린 대상이 플레이어라면, 그 대상의 이동 코드가 방금 실린 넉백 velocity를
+        // 덮어써 지우지 않도록 짧은 락아웃을 건다. 실제 물리는 대상의 소유 클라이언트에서만
+        // 시뮬레이션되므로 그쪽에서 FixedUpdate 이동이 유예된다(다른 클라에선 무해).
+        InputPlayer targetPlayer = identity.GetComponent<InputPlayer>();
+        if (targetPlayer != null)
+            targetPlayer.BeginKnockbackLockout();
+    }
+
+    // 넉백 락아웃 시작. 밀기(RpcApplyPush)·폭발(BoomBox) 등 외부 임펄스를 받은
+    // 대상에게 호출한다.
+    public void BeginKnockbackLockout()
+    {
+        knockbackActive = true;
+        knockbackRecovering = false;
+        knockbackLockoutUntil = Time.time + knockbackLockoutDuration;
+    }
+
+    // 넉백 종료 판정. 최소 락아웃 시간이 지난 뒤 착지했거나 이동 입력이 들어오면
+    // 제어를 돌려준다. 고정 타이머만 쓰면 공중 비행 도중 velocity가 덮여
+    // 수평으로 뚝 멈추는 부자연스러운 현상이 생긴다.
+    // 종료 시에는 복귀 블렌딩(knockbackRecovering)을 켜서 넉백 속도에서 목표 속도로
+    // 부드럽게 수렴시킨다.
+    private void UpdateKnockbackState()
+    {
+        if (!knockbackActive)
+            return;
+
+        if (Time.time < knockbackLockoutUntil)
+            return;
+
+        if (isGrounded || moving)
+        {
+            knockbackActive = false;
+            knockbackRecovering = true;
+        }
     }
 
     public void OnMoveLeft(InputAction.CallbackContext context)

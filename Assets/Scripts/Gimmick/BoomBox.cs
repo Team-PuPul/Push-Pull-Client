@@ -184,6 +184,10 @@ public class BoomBox : NetworkBehaviour
             return;
 
         targetRb.AddForce(direction * force, ForceMode2D.Impulse);
+
+        // 폭발 임펄스는 방사형(수평+수직)이라, 이동 코드가 velocity.x를 덮어쓰면
+        // 수평 성분이 지워지고 위로만 날아간다. 넉백 락아웃을 걸어 수평 넉백을 보존한다.
+        identity.GetComponent<InputPlayer>()?.BeginKnockbackLockout();
     }
 
     private void StopBoomBoxPhysics()
