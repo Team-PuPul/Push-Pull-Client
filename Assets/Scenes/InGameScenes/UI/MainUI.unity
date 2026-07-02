@@ -6146,6 +6146,9 @@ MonoBehaviour:
   roomCodeInput: {fileID: 958677173}
   createdRoomCodeText: {fileID: 0}
   statusText: {fileID: 0}
+  copyRoomCodeButton: {fileID: 0}
+  copyFeedbackText: {fileID: 0}
+  copyFeedbackDuration: 2
 --- !u!1 &997670389
 GameObject:
   m_ObjectHideFlags: 0
