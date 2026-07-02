@@ -1079,6 +1079,9 @@ GameObject:
   - component: {fileID: 2528128131104310317}
   - component: {fileID: 111358731517727899}
   - component: {fileID: 7232404890156327993}
+  - component: {fileID: 910000000000000020}
+  - component: {fileID: 910000000000000021}
+  - component: {fileID: 910000000000000022}
   - component: {fileID: 7045513754272109953}
   m_Layer: 0
   m_Name: Player_Black
@@ -1448,7 +1451,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   UI: {fileID: 858882268135124069}
-  soundManager: {fileID: 0}
   PlayerInput: {fileID: 111358731517727899}
   GrabObject: {fileID: 8854566455533192618}
   PushGlove: {fileID: 6005154046336473894}
@@ -1459,16 +1461,57 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   - {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   - {fileID: 8300000, guid: 5039414d94a6e4e70a5ab9e8833e992a, type: 3}
-  flip: 0
-  flipThreshold: 0.2
   cantMove: 0
-  jumpAble: 1
-  PushCharge: 0
-  Push: 0
   ControlScheme: Keyboard, Mouse
   verticalAnimDeadZone: 0.15
   groundRecheckDelay: 0.08
+--- !u!114 &910000000000000020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7732084735840748015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a18c729db42a44db9c95a9de527283a1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  moveSpeed: 4
+  jumpForce: 15
+  flipThreshold: 0.2
   againstPlatformBoost: 0.5
+--- !u!114 &910000000000000021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7732084735840748015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b296613198f84da78f3bcb9c0e909b11, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  maxPushCharge: 35
+  chargeTime: 1
+--- !u!114 &910000000000000022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7732084735840748015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c314ffb4e96a472cbbeb60123ef4a2c1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  rotationSpeed: 1
+  maxAngle: 35
+  aimSmooth: 8
+  grabDeadzone: 0.15
+  oscillationDelay: 0.5
 --- !u!114 &7045513754272109953
 MonoBehaviour:
   m_ObjectHideFlags: 0
