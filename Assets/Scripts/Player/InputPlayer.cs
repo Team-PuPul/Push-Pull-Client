@@ -1,18 +1,17 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.U2D;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerPushController))]
+[RequireComponent(typeof(PlayerGrabController))]
 public class InputPlayer : NetworkBehaviour
 {
     [SerializeField]
     private ExChargeUi UI;
-
-    [SerializeField]
-    private SoundManager soundManager;
 
     public PlayerInput PlayerInput;
     public Transform GrabObject;
@@ -23,51 +22,8 @@ public class InputPlayer : NetworkBehaviour
     public Animator Anim;
 
     public List<AudioClip> PlayerSounds = new List<AudioClip>();
-
-    private Rigidbody2D rb;
-    private Vector2 moveInput;
-    private bool moveLeft = false;
-    private bool moveRight = false;
-    private bool moving = false;
-    private float moveSpeed = 4f;
-
-    [SerializeField]
-    private bool flip;
-
-    [SerializeField]
-    private float flipThreshold = 0.2f;
-
-    public bool cantMove = false;
-    public bool jumpAble = true;
-
-    [Header("Push / Charge")]
-    private float MaxPushCharge = 35f;
-    private float ChargeTime = 1f;
-    public float PushCharge = 0f;
-    private bool isCharging = false;
-    public bool Push = false;
-
-    public bool PushHeld { get; private set; } = false;
-    public bool GrabHeld { get; private set; } = false;
-
-    [Header("Grab / Pull")]
-    private float RotSpeed = 1f;
-    private float maxAngle = 35f;
-    private float RPressTime = 0f;
-    private float aimSmooth = 8f;
-    private bool isGrabHolding = false;
-    private Vector2 grabControlInput = Vector2.zero;
-    private float grabDeadzone = 0.15f;
-
+    public bool cantMove;
     public string ControlScheme = "Keyboard, Mouse";
-
-    private string lastAnimName = "";
-
-    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
-    private static readonly int IsJumpingHash = Animator.StringToHash("IsJumping");
-    private static readonly int IsFallingHash = Animator.StringToHash("IsFalling");
-    private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
-    private static readonly int IsClearedHash = Animator.StringToHash("IsCleared");
 
     [Header("Animation")]
     [SerializeField]
@@ -76,16 +32,24 @@ public class InputPlayer : NetworkBehaviour
     [SerializeField]
     private float groundRecheckDelay = 0.08f;
 
+    private Rigidbody2D rb;
+    private string lastAnimName = "";
     private bool hasStartedFalling;
     private bool isGrounded = true;
     private float ignoreGroundUntilTime;
-
     private bool lastIsMoving;
     private bool lastIsJumping;
     private bool lastIsFalling;
+    private bool clearedStarted;
+
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int IsJumpingHash = Animator.StringToHash("IsJumping");
+    private static readonly int IsFallingHash = Animator.StringToHash("IsFalling");
+    private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+    private static readonly int IsClearedHash = Animator.StringToHash("IsCleared");
 
     [SyncVar(hook = nameof(OnFlipChanged))]
-    private bool syncFlip = false;
+    private bool syncFlip;
 
     [SyncVar(hook = nameof(OnAnimChanged))]
     private string syncAnimName = "";
@@ -102,18 +66,53 @@ public class InputPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnDeadChanged))]
     private bool syncIsDead;
 
-    private bool clearedStarted = false;
+    public PlayerMovement Movement { get; private set; }
+    public PlayerPushController PushController { get; private set; }
+    public PlayerGrabController GrabController { get; private set; }
 
-    [Header("Moving Surface")]
-    [SerializeField]
-    private float againstPlatformBoost = 0.5f;
+    internal ExChargeUi ChargeUI => UI;
+    internal bool CanProcessGameplay => isLocalPlayer && Time.timeScale != 0f && !cantMove;
 
-    private IMovingSurface currentMovingSurface;
-    private Vector3 lastMovingSurfacePosition;
+    // 기존 외부 코드가 InputPlayer를 통해 상태를 읽고 쓰는 API는 그대로 유지한다.
+    public bool jumpAble
+    {
+        get => Movement != null && Movement.JumpAble;
+        set
+        {
+            if (Movement != null)
+                Movement.JumpAble = value;
+        }
+    }
+
+    public float PushCharge
+    {
+        get => PushController != null ? PushController.PushCharge : 0f;
+        set
+        {
+            if (PushController != null)
+                PushController.PushCharge = value;
+        }
+    }
+
+    public bool Push
+    {
+        get => PushController != null && PushController.IsPushing;
+        set
+        {
+            if (PushController != null)
+                PushController.IsPushing = value;
+        }
+    }
+
+    public bool PushHeld => PushController != null && PushController.PushHeld;
+    public bool GrabHeld => GrabController != null && GrabController.GrabHeld;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        Movement = GetComponent<PlayerMovement>();
+        PushController = GetComponent<PlayerPushController>();
+        GrabController = GetComponent<PlayerGrabController>();
 
         if (Anim == null)
             Anim = GetComponent<Animator>();
@@ -133,9 +132,7 @@ public class InputPlayer : NetworkBehaviour
         {
             PlayerInput.enabled = true;
             PlayerInput.ActivateInput();
-
-            if (!string.IsNullOrEmpty(PlayerInput.currentControlScheme))
-                ControlScheme = PlayerInput.currentControlScheme;
+            RefreshControlScheme();
         }
 
         PlayerVisualInterpolator visualInterpolator = GetComponent<PlayerVisualInterpolator>();
@@ -143,8 +140,6 @@ public class InputPlayer : NetworkBehaviour
         if (rb != null)
         {
             rb.isKinematic = false;
-
-            // VisualRoot가 렌더링 보간을 담당하는 플레이어는 Rigidbody 보간을 중복 적용하지 않는다.
             rb.interpolation =
                 visualInterpolator != null
                     ? RigidbodyInterpolation2D.None
@@ -188,107 +183,30 @@ public class InputPlayer : NetworkBehaviour
 
     private void OnEnable()
     {
-        if (
-            PlayerInput != null
-            && PlayerInput.enabled
-            && !string.IsNullOrEmpty(PlayerInput.currentControlScheme)
-        )
-            ControlScheme = PlayerInput.currentControlScheme;
-
+        RefreshControlScheme();
         ResetVerticalAnimationTracker();
     }
 
     private void Update()
     {
-        if (!isLocalPlayer)
-            return;
-        if (Time.timeScale == 0f)
-            return;
-        if (cantMove)
-            return;
+        if (CanProcessGameplay)
+            RefreshControlScheme();
+    }
 
-        moving = moveRight ^ moveLeft;
+    private void LateUpdate()
+    {
+        if (CanProcessGameplay)
+            UpdateAnimatorParameters();
+    }
 
-        if (PushHeld)
-            UI.OnPush();
-        else
-            UI.OffPush();
-
-        if (GrabHeld)
-            UI.OnGrab();
-        else
-            UI.OffGrab();
-
+    private void RefreshControlScheme()
+    {
         if (
             PlayerInput != null
             && PlayerInput.enabled
             && !string.IsNullOrEmpty(PlayerInput.currentControlScheme)
         )
             ControlScheme = PlayerInput.currentControlScheme;
-
-        HandleMouseGrabInput();
-
-        if (isCharging)
-        {
-            float chargeRate = (ChargeTime > 0f) ? (MaxPushCharge / ChargeTime) : MaxPushCharge;
-            PushCharge += chargeRate * Time.deltaTime;
-
-            if (PushCharge > MaxPushCharge)
-                PushCharge = MaxPushCharge;
-        }
-
-        if (PushGlove != null)
-            PushGlove.PushPower = PushCharge;
-
-        if (GrabHeld && GrabGlove != null && !GrabGlove.grabing && !isGrabHolding)
-        {
-            isGrabHolding = true;
-            RPressTime = Time.time;
-        }
-
-        if (GrabGlove != null && !GrabGlove.grabing)
-            UpdateGrabRotation();
-    }
-
-    private void FixedUpdate()
-    {
-        if (!isLocalPlayer)
-            return;
-        if (Time.timeScale == 0f)
-            return;
-        if (cantMove)
-            return;
-
-        if (moving)
-        {
-            Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f, 0f);
-
-            transform.Translate(move);
-        }
-
-        // 발판 이동도 플레이어 이동과 같은 물리 주기에서 처리
-        ApplyMovingSurfaceCarry();
-
-        if (Mathf.Abs(moveInput.x) > flipThreshold && GrabGlove != null && !GrabGlove.grabing)
-        {
-            if (moveInput.x > 0f && !flip)
-                Flip();
-            else if (moveInput.x < 0f && flip)
-                Flip();
-        }
-    }
-
-    private void LateUpdate()
-    {
-        if (!isLocalPlayer)
-            return;
-        if (Time.timeScale == 0f)
-            return;
-        if (cantMove)
-            return;
-
-        // ApplyMovingSurfaceCarry()는 FixedUpdate로 이동
-        UpdateAnimatorParameters();
     }
 
     public void SetGrounded(bool grounded)
@@ -300,81 +218,17 @@ public class InputPlayer : NetworkBehaviour
             return;
 
         bool wasGrounded = isGrounded;
-
         isGrounded = grounded;
         jumpAble = grounded;
 
-        if (grounded)
-        {
-            hasStartedFalling = false;
-            ResetVerticalAnimationTracker();
-
-            if (!wasGrounded || IsInAirAnimatorState())
-                ForceGroundedAnimatorState(Mathf.Abs(moveInput.x) > 0.01f);
-        }
-    }
-
-    private void ForceGroundedAnimatorState(bool isMoving)
-    {
-        lastIsMoving = isMoving;
-        lastIsJumping = false;
-        lastIsFalling = false;
-
-        ApplyLocomotionAnimatorState(isMoving, false, false);
-
-        if (Anim != null)
-            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
-
-        if (isServer)
-        {
-            SetSyncLocomotionAnimatorState(isMoving, false, false);
-            RpcForceGroundedAnimatorState(isMoving);
-        }
-        else
-        {
-            CmdForceGroundedAnimatorState(isMoving);
-        }
-    }
-
-    private bool IsInAirAnimatorState()
-    {
-        if (Anim == null)
-            return false;
-
-        AnimatorStateInfo current = Anim.GetCurrentAnimatorStateInfo(0);
-
-        if (current.IsName("Jump") || current.IsName("Max") || current.IsName("Fall"))
-            return true;
-
-        if (!Anim.IsInTransition(0))
-            return false;
-
-        AnimatorStateInfo next = Anim.GetNextAnimatorStateInfo(0);
-
-        return next.IsName("Jump") || next.IsName("Max") || next.IsName("Fall");
-    }
-
-    [Command]
-    private void CmdForceGroundedAnimatorState(bool isMoving)
-    {
-        SetSyncLocomotionAnimatorState(isMoving, false, false);
-        RpcForceGroundedAnimatorState(isMoving);
-    }
-
-    [ClientRpc]
-    private void RpcForceGroundedAnimatorState(bool isMoving)
-    {
-        if (isLocalPlayer)
+        if (!grounded)
             return;
 
-        lastIsMoving = isMoving;
-        lastIsJumping = false;
-        lastIsFalling = false;
+        hasStartedFalling = false;
+        ResetVerticalAnimationTracker();
 
-        ApplyLocomotionAnimatorState(isMoving, false, false);
-
-        if (Anim != null)
-            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
+        if (!wasGrounded || IsInAirAnimatorState())
+            ForceGroundedAnimatorState(Mathf.Abs(GetMoveInput().x) > 0.01f);
     }
 
     public void ForceAirborne()
@@ -384,6 +238,11 @@ public class InputPlayer : NetworkBehaviour
         jumpAble = false;
         hasStartedFalling = false;
         ResetVerticalAnimationTracker();
+    }
+
+    private Vector2 GetMoveInput()
+    {
+        return Movement != null ? Movement.MoveInput : Vector2.zero;
     }
 
     private void ResetVerticalAnimationTracker()
@@ -396,7 +255,7 @@ public class InputPlayer : NetworkBehaviour
         if (Anim == null)
             return;
 
-        bool isMoving = Mathf.Abs(moveInput.x) > 0.01f;
+        bool isMoving = Mathf.Abs(GetMoveInput().x) > 0.01f;
         bool groundedForAnimation = isGrounded && Time.time >= ignoreGroundUntilTime;
         float ySpeed = rb != null ? rb.velocity.y : 0f;
 
@@ -432,6 +291,66 @@ public class InputPlayer : NetworkBehaviour
         SetLocomotionAnimatorState(isMoving, isJumping, isFalling);
     }
 
+    private void ForceGroundedAnimatorState(bool isMoving)
+    {
+        lastIsMoving = isMoving;
+        lastIsJumping = false;
+        lastIsFalling = false;
+        ApplyLocomotionAnimatorState(isMoving, false, false);
+
+        if (Anim != null)
+            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
+
+        if (isServer)
+        {
+            SetSyncLocomotionAnimatorState(isMoving, false, false);
+            RpcForceGroundedAnimatorState(isMoving);
+        }
+        else
+        {
+            CmdForceGroundedAnimatorState(isMoving);
+        }
+    }
+
+    private bool IsInAirAnimatorState()
+    {
+        if (Anim == null)
+            return false;
+
+        AnimatorStateInfo current = Anim.GetCurrentAnimatorStateInfo(0);
+
+        if (current.IsName("Jump") || current.IsName("Max") || current.IsName("Fall"))
+            return true;
+
+        if (!Anim.IsInTransition(0))
+            return false;
+
+        AnimatorStateInfo next = Anim.GetNextAnimatorStateInfo(0);
+        return next.IsName("Jump") || next.IsName("Max") || next.IsName("Fall");
+    }
+
+    [Command]
+    private void CmdForceGroundedAnimatorState(bool isMoving)
+    {
+        SetSyncLocomotionAnimatorState(isMoving, false, false);
+        RpcForceGroundedAnimatorState(isMoving);
+    }
+
+    [ClientRpc]
+    private void RpcForceGroundedAnimatorState(bool isMoving)
+    {
+        if (isLocalPlayer)
+            return;
+
+        lastIsMoving = isMoving;
+        lastIsJumping = false;
+        lastIsFalling = false;
+        ApplyLocomotionAnimatorState(isMoving, false, false);
+
+        if (Anim != null)
+            Anim.Play(isMoving ? "Move" : "Idle", 0, 0f);
+    }
+
     private void SetLocomotionAnimatorState(bool isMoving, bool isJumping, bool isFalling)
     {
         if (lastIsMoving == isMoving && lastIsJumping == isJumping && lastIsFalling == isFalling)
@@ -440,7 +359,6 @@ public class InputPlayer : NetworkBehaviour
         lastIsMoving = isMoving;
         lastIsJumping = isJumping;
         lastIsFalling = isFalling;
-
         ApplyLocomotionAnimatorState(isMoving, isJumping, isFalling);
 
         if (!isLocalPlayer)
@@ -461,10 +379,8 @@ public class InputPlayer : NetworkBehaviour
 
     private void SetAnimatorBool(int parameterHash, bool value)
     {
-        if (Anim == null)
-            return;
-
-        Anim.SetBool(parameterHash, value);
+        if (Anim != null)
+            Anim.SetBool(parameterHash, value);
     }
 
     [Command]
@@ -483,142 +399,37 @@ public class InputPlayer : NetworkBehaviour
 
     private void OnMovingChanged(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer)
-            return;
-
-        SetAnimatorBool(IsMovingHash, newValue);
+        if (!isLocalPlayer)
+            SetAnimatorBool(IsMovingHash, newValue);
     }
 
     private void OnJumpingChanged(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer)
-            return;
-
-        SetAnimatorBool(IsJumpingHash, newValue);
+        if (!isLocalPlayer)
+            SetAnimatorBool(IsJumpingHash, newValue);
     }
 
     private void OnFallingChanged(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer)
-            return;
-
-        SetAnimatorBool(IsFallingHash, newValue);
+        if (!isLocalPlayer)
+            SetAnimatorBool(IsFallingHash, newValue);
     }
 
     private void OnDeadChanged(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer)
-            return;
-
-        SetAnimatorBool(IsDeadHash, newValue);
+        if (!isLocalPlayer)
+            SetAnimatorBool(IsDeadHash, newValue);
     }
 
-    private void ApplyMovingSurfaceCarry()
-    {
-        if (currentMovingSurface == null)
-            return;
-
-        if (currentMovingSurface is Object surfaceObject && surfaceObject == null)
-        {
-            currentMovingSurface = null;
-            return;
-        }
-
-        if (!currentMovingSurface.CanCarryPlayer)
-        {
-            currentMovingSurface = null;
-            return;
-        }
-
-        Vector3 surfacePosition = currentMovingSurface.CarryPosition;
-        Vector3 surfaceDelta = surfacePosition - lastMovingSurfacePosition;
-
-        Vector3 extraMove = Vector3.zero;
-
-        if (Mathf.Abs(moveInput.x) > 0.01f && Mathf.Abs(surfaceDelta.x) > 0.0001f)
-        {
-            bool movingAgainstPlatform = Mathf.Sign(moveInput.x) != Mathf.Sign(surfaceDelta.x);
-
-            if (movingAgainstPlatform)
-                extraMove.x = moveInput.x * Mathf.Abs(surfaceDelta.x) * againstPlatformBoost;
-        }
-
-        Vector3 carryDelta = surfaceDelta + extraMove;
-
-        if (carryDelta != Vector3.zero)
-            transform.position += carryDelta;
-
-        lastMovingSurfacePosition = surfacePosition;
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
+    private void OnAnimChanged(string oldValue, string newValue)
     {
         if (!isLocalPlayer)
-            return;
-
-        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
-            return;
-
-        if (!IsGroundContact(collision))
-        {
-            if (ReferenceEquals(currentMovingSurface, movingSurface))
-                currentMovingSurface = null;
-
-            return;
-        }
-
-        if (ReferenceEquals(currentMovingSurface, movingSurface))
-            return;
-
-        currentMovingSurface = movingSurface;
-        lastMovingSurfacePosition = movingSurface.CarryPosition;
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (!isLocalPlayer)
-            return;
-
-        if (!TryGetMovingSurface(collision, out IMovingSurface movingSurface))
-            return;
-
-        if (ReferenceEquals(currentMovingSurface, movingSurface))
-            currentMovingSurface = null;
-    }
-
-    private bool TryGetMovingSurface(Collision2D collision, out IMovingSurface movingSurface)
-    {
-        movingSurface = collision.collider.GetComponentInParent<IMovingSurface>();
-        return movingSurface != null && movingSurface.CanCarryPlayer;
-    }
-
-    private bool IsGroundContact(Collision2D collision)
-    {
-        for (int i = 0; i < collision.contactCount; i++)
-        {
-            ContactPoint2D contact = collision.GetContact(i);
-
-            if (contact.normal.y > 0.5f)
-                return true;
-        }
-
-        return false;
-    }
-
-    private void OnAnimChanged(string oldVal, string newVal)
-    {
-        if (isLocalPlayer)
-            return;
-
-        PlayAnimLocal(newVal);
+            PlayAnimLocal(newValue);
     }
 
     public void PlayAnim(string animName)
     {
-        if (string.IsNullOrEmpty(animName))
-            return;
-
-        if (animName == lastAnimName)
+        if (string.IsNullOrEmpty(animName) || animName == lastAnimName)
             return;
 
         lastAnimName = animName;
@@ -635,10 +446,8 @@ public class InputPlayer : NetworkBehaviour
 
     private void PlayAnimLocal(string animName)
     {
-        if (string.IsNullOrEmpty(animName))
-            return;
-
-        Anim?.Play(animName);
+        if (!string.IsNullOrEmpty(animName))
+            Anim?.Play(animName);
     }
 
     [Command]
@@ -647,19 +456,15 @@ public class InputPlayer : NetworkBehaviour
         syncAnimName = animName;
     }
 
-    private void OnFlipChanged(bool oldVal, bool newVal)
+    private void OnFlipChanged(bool oldValue, bool newValue)
     {
-        if (isLocalPlayer)
-            return;
-
-        ApplyFlip(newVal);
+        if (!isLocalPlayer)
+            Movement?.ApplyFlip(newValue);
     }
 
-    private void ApplyFlip(bool isFlipped)
+    internal void SyncFlip(bool isFlipped)
     {
-        Vector3 scale = transform.localScale;
-        scale.x = isFlipped ? -Mathf.Abs(scale.x) : Mathf.Abs(scale.x);
-        transform.localScale = scale;
+        CmdSyncFlip(isFlipped);
     }
 
     [Command]
@@ -668,9 +473,15 @@ public class InputPlayer : NetworkBehaviour
         syncFlip = isFlipped;
     }
 
+    public void Flip()
+    {
+        Movement?.Flip();
+    }
+
     public void SyncPunchAnim()
     {
-        CmdPunchAnim();
+        if (isLocalPlayer)
+            CmdPunchAnim();
     }
 
     [Command]
@@ -682,10 +493,8 @@ public class InputPlayer : NetworkBehaviour
     [ClientRpc]
     private void RpcPunchAnim()
     {
-        if (isLocalPlayer)
-            return;
-
-        PushGlove?.DoPunchAnim();
+        if (!isLocalPlayer)
+            PushGlove?.DoPunchAnim();
     }
 
     public void SyncMoveTarget(uint targetNetId, Vector3 targetPos)
@@ -707,316 +516,81 @@ public class InputPlayer : NetworkBehaviour
             identity.transform.position = targetPos;
     }
 
-    public void SyncApplyPush(uint targetNetId, Vector2 dir, float power)
+    public void SyncApplyPush(uint targetNetId, Vector2 direction, float power)
     {
         if (isLocalPlayer)
-            CmdApplyPush(targetNetId, dir, power);
+            CmdApplyPush(targetNetId, direction, power);
     }
 
     [Command]
-    private void CmdApplyPush(uint targetNetId, Vector2 dir, float power)
+    private void CmdApplyPush(uint targetNetId, Vector2 direction, float power)
     {
-        RpcApplyPush(targetNetId, dir, power);
+        RpcApplyPush(targetNetId, direction, power);
     }
 
     [ClientRpc]
-    private void RpcApplyPush(uint targetNetId, Vector2 dir, float power)
+    private void RpcApplyPush(uint targetNetId, Vector2 direction, float power)
     {
         if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
             return;
 
-        Rigidbody2D rigid = identity.GetComponent<Rigidbody2D>();
-        if (rigid == null)
+        Rigidbody2D targetBody = identity.GetComponent<Rigidbody2D>();
+
+        if (targetBody == null)
             return;
 
-        Vector2 impulseVector = dir * power + Vector2.up * power / 2f;
-        rigid.AddForce(impulseVector, ForceMode2D.Impulse);
+        Vector2 impulse = direction * power + Vector2.up * power / 2f;
+        targetBody.AddForce(impulse, ForceMode2D.Impulse);
     }
 
+    // PlayerInput의 기존 Unity Event 연결을 유지하는 전달용 콜백들이다.
     public void OnMoveLeft(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        if (context.started || context.performed)
-            moveLeft = true;
-        else if (context.canceled)
-            moveLeft = false;
-
-        UpdateMoveInput();
+        Movement?.HandleMoveLeft(context);
     }
 
     public void OnMoveRight(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        if (context.started || context.performed)
-            moveRight = true;
-        else if (context.canceled)
-            moveRight = false;
-
-        UpdateMoveInput();
-    }
-
-    private void UpdateMoveInput()
-    {
-        if (moveLeft && moveRight)
-            moveInput = Vector2.zero;
-        else if (moveLeft)
-            moveInput = Vector2.left;
-        else if (moveRight)
-            moveInput = Vector2.right;
-        else
-            moveInput = Vector2.zero;
+        Movement?.HandleMoveRight(context);
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        if (context.performed && jumpAble)
-        {
-            rb.AddForce(Vector2.up * 15f, ForceMode2D.Impulse);
-            ForceAirborne();
-
-            SoundManager.Instance?.SFXPlay(
-                "PlayerJump_1",
-                PlayerSounds[(int)global::PlayerSounds.Jump]
-            );
-        }
+        Movement?.HandleJump(context);
     }
 
     public void OnPush(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        if (context.started)
-        {
-            PushHeld = true;
-            isCharging = true;
-            PushCharge = 0f;
-        }
-        else if (context.canceled)
-        {
-            PushHeld = false;
-
-            if (isCharging)
-            {
-                isCharging = false;
-                Push = true;
-
-                SoundManager.Instance?.SFXPlay(
-                    "PlayerPush_1",
-                    PlayerSounds[(int)global::PlayerSounds.Push]
-                );
-
-                PushGlove?.DoPunchAnim();
-                SyncPunchAnim();
-            }
-        }
+        PushController?.HandleInput(context);
     }
 
     public void OnGrab(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        if (context.started)
-            BeginGrabInput();
-        else if (context.canceled)
-            EndGrabInput();
-    }
-
-    private void HandleMouseGrabInput()
-    {
-        Mouse mouse = Mouse.current;
-
-        if (mouse == null)
-            return;
-
-        if (mouse.rightButton.wasPressedThisFrame)
-        {
-            ControlScheme = "Keyboard, Mouse";
-            BeginGrabInput();
-        }
-
-        if (mouse.rightButton.wasReleasedThisFrame)
-            EndGrabInput();
-    }
-
-    private void BeginGrabInput()
-    {
-        if (GrabHeld)
-            return;
-
-        GrabHeld = true;
-
-        if (GrabGlove == null || GrabGlove.grabing)
-            return;
-
-        isGrabHolding = true;
-        RPressTime = Time.time;
-
-        if (GrabObject != null)
-            GrabObject.rotation = Quaternion.Euler(0f, 0f, 0f);
-    }
-
-    private void EndGrabInput()
-    {
-        if (!GrabHeld)
-            return;
-
-        GrabHeld = false;
-        isGrabHolding = false;
-        GrabGlove?.DOGrab();
-
-        SoundManager.Instance?.SFXPlay(
-            "PlayerPull_1",
-            PlayerSounds[(int)global::PlayerSounds.Pull]
-        );
-
-        grabControlInput = Vector2.zero;
+        GrabController?.HandleInput(context);
     }
 
     public void OnGrabControll(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer)
-            return;
-
-        grabControlInput = context.ReadValue<Vector2>();
+        GrabController?.HandleControlInput(context);
     }
 
-    private void UpdateGrabRotation()
+    public bool ConsumePush(out float charge)
     {
-        if (GrabObject == null)
-            return;
-        if (!isGrabHolding)
-            return;
+        if (PushController != null)
+            return PushController.ConsumePush(out charge);
 
-        bool isKeyboard = ControlScheme != null && ControlScheme.ToLower().Contains("keyboard");
-
-        if (isKeyboard)
-        {
-            Camera cam = Camera.main;
-            Mouse mouse = Mouse.current;
-
-            if (cam != null && mouse != null)
-            {
-                Vector2 screenPos = mouse.position.ReadValue();
-                Vector3 world = cam.ScreenToWorldPoint(
-                    new Vector3(screenPos.x, screenPos.y, cam.nearClipPlane)
-                );
-                world.z = GrabObject.position.z;
-
-                Vector3 dirWorld = world - GrabObject.position;
-
-                if (dirWorld.sqrMagnitude > 0.0001f)
-                {
-                    float facingSign = flip ? 1f : -1f;
-                    float adjustedX = dirWorld.x * facingSign;
-
-                    float desiredLocal = Mathf.Atan2(-dirWorld.y, adjustedX) * Mathf.Rad2Deg;
-
-                    desiredLocal = Mathf.Clamp(
-                        desiredLocal,
-                        -Mathf.Abs(maxAngle),
-                        Mathf.Abs(maxAngle)
-                    );
-
-                    float currentLocalZ = GrabObject.localEulerAngles.z;
-                    float smoothLocalZ = Mathf.LerpAngle(
-                        currentLocalZ,
-                        desiredLocal,
-                        Time.deltaTime * aimSmooth
-                    );
-
-                    GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
-                }
-                else
-                {
-                    ApplyOscillationIfNeeded();
-                }
-            }
-            else
-            {
-                ApplyOscillationIfNeeded();
-            }
-        }
-        else
-        {
-            Vector2 stick = grabControlInput;
-
-            if (stick.magnitude >= grabDeadzone)
-            {
-                float rawAngle = Mathf.Atan2(-stick.y, -stick.x) * Mathf.Rad2Deg;
-
-                float desiredLocal = Mathf.Clamp(
-                    rawAngle,
-                    -Mathf.Abs(maxAngle),
-                    Mathf.Abs(maxAngle)
-                );
-
-                float currentLocalZ = GrabObject.localEulerAngles.z;
-                float smoothLocalZ = Mathf.LerpAngle(
-                    currentLocalZ,
-                    desiredLocal,
-                    Time.deltaTime * aimSmooth
-                );
-
-                GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
-            }
-            else
-            {
-                ApplyOscillationIfNeeded();
-            }
-        }
-    }
-
-    private void ApplyOscillationIfNeeded()
-    {
-        if (GrabObject == null)
-            return;
-
-        if (Time.time - RPressTime >= 0.5f)
-        {
-            float elapsed = Time.time - RPressTime - 0.5f;
-            float angle = Mathf.Sin(elapsed * RotSpeed) * maxAngle;
-            float currentLocalZ = GrabObject.localEulerAngles.z;
-            float smoothLocalZ = Mathf.LerpAngle(currentLocalZ, angle, Time.deltaTime * aimSmooth);
-            GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
-        }
-        else
-        {
-            float currentLocalZ = GrabObject.localEulerAngles.z;
-            float smoothLocalZ = Mathf.LerpAngle(currentLocalZ, 0f, Time.deltaTime * aimSmooth);
-            GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothLocalZ);
-        }
-    }
-
-    public void Flip()
-    {
-        flip = !flip;
-        ApplyFlip(flip);
-
-        if (isLocalPlayer)
-            CmdSyncFlip(flip);
-    }
-
-    public bool ConsumePush(out float outCharge)
-    {
-        if (Push)
-        {
-            outCharge = PushCharge;
-            Push = false;
-            PushCharge = 0f;
-            return true;
-        }
-
-        outCharge = 0f;
+        charge = 0f;
         return false;
+    }
+
+    internal void PlayPlayerSound(string soundName, global::PlayerSounds sound)
+    {
+        int soundIndex = (int)sound;
+
+        if (soundIndex < 0 || soundIndex >= PlayerSounds.Count)
+            return;
+
+        SoundManager.Instance?.SFXPlay(soundName, PlayerSounds[soundIndex]);
     }
 
     public void Die()
@@ -1024,8 +598,7 @@ public class InputPlayer : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        SoundManager.Instance?.SFXPlay("PlayerDied_1", PlayerSounds[(int)global::PlayerSounds.Die]);
-
+        PlayPlayerSound("PlayerDied_1", global::PlayerSounds.Die);
         cantMove = true;
         SetLocomotionAnimatorState(false, false, false);
         SetAnimatorBool(IsDeadHash, true);
@@ -1067,12 +640,11 @@ public class InputPlayer : NetworkBehaviour
             return;
 
         clearedStarted = true;
-
         cantMove = true;
         ApplyLocomotionAnimatorState(false, false, false);
         SetAnimatorBool(IsClearedHash, true);
 
-        if (gameObject.TryGetComponent<SpriteRenderer>(out SpriteRenderer sprite))
+        if (gameObject.TryGetComponent(out SpriteRenderer sprite))
             StartCoroutine(FadeOutSprite(sprite, 0.5f));
     }
 
@@ -1086,11 +658,9 @@ public class InputPlayer : NetworkBehaviour
         {
             time += Time.deltaTime;
             float t = time / duration;
-
             Color newColor = sprite.color;
             newColor.a = Mathf.Lerp(startAlpha, 0f, t);
             sprite.color = newColor;
-
             yield return null;
         }
 
