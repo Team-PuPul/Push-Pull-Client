@@ -42,13 +42,21 @@ public class ExChargeUi : MonoBehaviour
 	{
             PGage.gameObject.SetActive(true);
             Vector3 scale = PGage.rectTransform.localScale;
-            if (transform.parent.localScale.x < 0)
+            if (Player != null && Player.transform.localScale.x < 0f)
             {
-                PGage.rectTransform.localScale = new Vector3(-scale.y, scale.y, scale.z);
+                PGage.rectTransform.localScale = new Vector3(
+                    -Mathf.Abs(scale.x),
+                    scale.y,
+                    scale.z
+                );
             }
             else
             {
-                PGage.rectTransform.localScale = new Vector3(scale.y, scale.y, scale.z);
+                PGage.rectTransform.localScale = new Vector3(
+                    Mathf.Abs(scale.x),
+                    scale.y,
+                    scale.z
+                );
             }
     }
 

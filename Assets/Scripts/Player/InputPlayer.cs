@@ -138,18 +138,25 @@ public class InputPlayer : NetworkBehaviour
                 ControlScheme = PlayerInput.currentControlScheme;
         }
 
+        PlayerVisualInterpolator visualInterpolator = GetComponent<PlayerVisualInterpolator>();
+
         if (rb != null)
         {
             rb.isKinematic = false;
 
-            // 로컬 플레이어의 물리 프레임 사이 렌더링 위치 보간
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            // VisualRoot가 렌더링 보간을 담당하는 플레이어는 Rigidbody 보간을 중복 적용하지 않는다.
+            rb.interpolation =
+                visualInterpolator != null
+                    ? RigidbodyInterpolation2D.None
+                    : RigidbodyInterpolation2D.Interpolate;
         }
 
         CameraFollow cameraFollow = Camera.main?.GetComponent<CameraFollow>();
 
         if (cameraFollow != null)
-            cameraFollow.SetTarget(transform);
+            cameraFollow.SetTarget(
+                visualInterpolator != null ? visualInterpolator.CameraTarget : transform
+            );
 
         ResetVerticalAnimationTracker();
 
@@ -218,6 +225,8 @@ public class InputPlayer : NetworkBehaviour
             && !string.IsNullOrEmpty(PlayerInput.currentControlScheme)
         )
             ControlScheme = PlayerInput.currentControlScheme;
+
+        HandleMouseGrabInput();
 
         if (isCharging)
         {
@@ -816,31 +825,60 @@ public class InputPlayer : NetworkBehaviour
             return;
 
         if (context.started)
-        {
-            GrabHeld = true;
-
-            if (GrabGlove != null && !GrabGlove.grabing)
-            {
-                isGrabHolding = true;
-                RPressTime = Time.time;
-
-                if (GrabObject != null)
-                    GrabObject.rotation = Quaternion.Euler(0f, 0f, 0f);
-            }
-        }
+            BeginGrabInput();
         else if (context.canceled)
+            EndGrabInput();
+    }
+
+    private void HandleMouseGrabInput()
+    {
+        Mouse mouse = Mouse.current;
+
+        if (mouse == null)
+            return;
+
+        if (mouse.rightButton.wasPressedThisFrame)
         {
-            GrabHeld = false;
-            isGrabHolding = false;
-            GrabGlove?.DOGrab();
-
-            SoundManager.Instance?.SFXPlay(
-                "PlayerPull_1",
-                PlayerSounds[(int)global::PlayerSounds.Pull]
-            );
-
-            grabControlInput = Vector2.zero;
+            ControlScheme = "Keyboard, Mouse";
+            BeginGrabInput();
         }
+
+        if (mouse.rightButton.wasReleasedThisFrame)
+            EndGrabInput();
+    }
+
+    private void BeginGrabInput()
+    {
+        if (GrabHeld)
+            return;
+
+        GrabHeld = true;
+
+        if (GrabGlove == null || GrabGlove.grabing)
+            return;
+
+        isGrabHolding = true;
+        RPressTime = Time.time;
+
+        if (GrabObject != null)
+            GrabObject.rotation = Quaternion.Euler(0f, 0f, 0f);
+    }
+
+    private void EndGrabInput()
+    {
+        if (!GrabHeld)
+            return;
+
+        GrabHeld = false;
+        isGrabHolding = false;
+        GrabGlove?.DOGrab();
+
+        SoundManager.Instance?.SFXPlay(
+            "PlayerPull_1",
+            PlayerSounds[(int)global::PlayerSounds.Pull]
+        );
+
+        grabControlInput = Vector2.zero;
     }
 
     public void OnGrabControll(InputAction.CallbackContext context)
