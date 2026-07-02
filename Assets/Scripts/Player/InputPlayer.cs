@@ -139,9 +139,15 @@ public class InputPlayer : NetworkBehaviour
         }
 
         if (rb != null)
+        {
             rb.isKinematic = false;
 
+            // 로컬 플레이어의 물리 프레임 사이 렌더링 위치 보간
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+
         CameraFollow cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+
         if (cameraFollow != null)
             cameraFollow.SetTarget(transform);
 
@@ -247,8 +253,12 @@ public class InputPlayer : NetworkBehaviour
         if (moving)
         {
             Vector3 move = new Vector3(moveInput.x * moveSpeed * Time.fixedDeltaTime, 0f, 0f);
+
             transform.Translate(move);
         }
+
+        // 발판 이동도 플레이어 이동과 같은 물리 주기에서 처리
+        ApplyMovingSurfaceCarry();
 
         if (Mathf.Abs(moveInput.x) > flipThreshold && GrabGlove != null && !GrabGlove.grabing)
         {
@@ -268,7 +278,7 @@ public class InputPlayer : NetworkBehaviour
         if (cantMove)
             return;
 
-        ApplyMovingSurfaceCarry();
+        // ApplyMovingSurfaceCarry()는 FixedUpdate로 이동
         UpdateAnimatorParameters();
     }
 
