@@ -867,7 +867,7 @@ GameObject:
   - component: {fileID: 5106409948247706023}
   - component: {fileID: 858882268135124069}
   m_Layer: 5
-  m_Name: 1Gauge
+  m_Name: Gauge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1824,7 +1824,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3699932242393689743}
   m_Layer: 5
-  m_Name: Player1G
+  m_Name: PushPower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1839,7 +1839,7 @@ RectTransform:
   m_GameObject: {fileID: 8791758098328222206}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2451490185380455436}
