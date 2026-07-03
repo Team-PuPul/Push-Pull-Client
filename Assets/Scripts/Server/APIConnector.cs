@@ -152,10 +152,7 @@ public sealed class APIConnector : MonoBehaviour
 
     private UnityWebRequest CreateRequest(string endpoint, string method, string json = null)
     {
-        UnityWebRequest request = new UnityWebRequest(
-            endpointSO.BaseUrl + endpoint,
-            method
-        );
+        UnityWebRequest request = new UnityWebRequest(endpointSO.BaseUrl + endpoint, method);
 
         request.downloadHandler = new DownloadHandlerBuffer();
 
