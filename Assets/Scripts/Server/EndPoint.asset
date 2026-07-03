@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 494f3be092c628347acfadd2731f1599, type: 3}
   m_Name: EndPoint
   m_EditorClassIdentifier: 
-  baseUrl: https://pupul.https.gsmsv.site/api/v1
+  baseUrl: https://pupul-stage.https.gsmsv.site/api/v1

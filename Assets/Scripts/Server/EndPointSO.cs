@@ -6,7 +6,7 @@ public sealed class EndPointSO : ScriptableObject
 {
     [Header("Server")]
     [SerializeField]
-    private string baseUrl = "https://pupul.https.gsmsv.site/api/v1";
+    private string baseUrl = "https://pupul-stage.https.gsmsv.site/api/v1";
 
     public string BaseUrl => baseUrl.TrimEnd('/');
 
