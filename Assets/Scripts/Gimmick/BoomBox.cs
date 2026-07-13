@@ -34,8 +34,28 @@ public class BoomBox : NetworkBehaviour
     {
         base.OnStartClient();
 
+        // 서버 권한 물리가 설정된 경우, 서버가 아닌 클라이언트에서는 직접 물리를 시뮬레이션하지 않고
+        // NetworkTransform이 전달하는 위치를 그대로 반영한다.
+        // (양쪽이 각자 물리를 돌리면 밀기/당기기 결과가 어긋나기 때문이다.)
+        if (!isServer)
+            TryEnableServerAuthorityMode();
+
         if (exploded)
             ApplyExplodedState();
+    }
+
+    // NetworkTransform이 ServerToClient(서버 권한)로 설정돼 있을 때만
+    // 비서버 클라이언트의 Rigidbody2D를 Kinematic으로 전환한다.
+    // NetworkTransform이 없으면 기존 방식(전 클라이언트 물리)과 호환되도록 그대로 둔다.
+    private void TryEnableServerAuthorityMode()
+    {
+        if (boxRigidbody == null)
+            return;
+
+        NetworkTransformBase netTransform = GetComponent<NetworkTransformBase>();
+
+        if (netTransform != null && netTransform.syncDirection == SyncDirection.ServerToClient)
+            boxRigidbody.bodyType = RigidbodyType2D.Kinematic;
     }
 
     [ServerCallback]

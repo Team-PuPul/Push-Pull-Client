@@ -186,6 +186,8 @@ public class UIButton : Button
             case ButtonType.GoMain:
                 enableCanvas = FindObjectsOfType<ButtonCanvas>().Where(canvas => canvas.MainCanvas == true).First();
                 changeCanvas(); break;
+            case ButtonType.Quit:
+                Application.Quit(); break;
         }
     }
 

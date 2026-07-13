@@ -218,6 +218,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
+  useTextColorTransition: 0
+  targetText: {fileID: 0}
   disableCanvas: {fileID: 841343842}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 1275984884}
@@ -345,6 +347,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
+  useTextColorTransition: 0
+  targetText: {fileID: 0}
   disableCanvas: {fileID: 841343842}
   enableCanvas: {fileID: 500468751}
   disablePanel: {fileID: 1882948235}
@@ -2070,6 +2074,70 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!1001 &1870536164
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6441614388983903939, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_Name
+      value: Player_White
+      objectReference: {fileID: 0}
+    - target: {fileID: 6933137984212265782, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: sceneId
+      value: 899849329
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -7.2557764
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.39296708
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904040744203323821, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6298725454642929204, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+  m_SourcePrefab: {fileID: 100100000, guid: da54ca5b60202144da447369c8a81f2c, type: 3}
 --- !u!1 &1882948230
 GameObject:
   m_ObjectHideFlags: 0
@@ -2392,6 +2460,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
+  useTextColorTransition: 0
+  targetText: {fileID: 0}
   disableCanvas: {fileID: 841343842}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 1275984884}
@@ -2568,3 +2638,4 @@ SceneRoots:
   - {fileID: 1275984882}
   - {fileID: 1355952380}
   - {fileID: 435614784}
+  - {fileID: 1870536164}
