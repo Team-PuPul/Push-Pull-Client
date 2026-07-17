@@ -140,18 +140,64 @@ public class BoomBox : NetworkBehaviour
 
             if (TryGetPlayerIdentity(targetRb, out NetworkIdentity playerIdentity))
             {
-                TargetApplyExplosionForce(
-                    playerIdentity.connectionToClient,
-                    playerIdentity.netId,
-                    direction,
-                    explosionForce
-                );
+                ClientApplyExplosionForce(playerIdentity.netId, direction, explosionForce);
+
+                continue;
             }
-            else
-            {
-                targetRb.AddForce(direction * explosionForce, ForceMode2D.Impulse);
-            }
+
+            ApplyExplosionForceToObject(targetRb, direction);
         }
+    }
+
+    // 플레이어가 아닌 대상(다른 박스 등)에 폭발력을 적용한다.
+    // 서버 권한 물리 오브젝트는 서버에서만 힘을 주고 NetworkTransform이 위치를 동기화하며,
+    // NetworkTransform이 없는 오브젝트는 전 클라이언트가 동일한 힘을 적용한다.
+    // (기존에는 서버에서만 AddForce를 호출해 클라이언트 쪽 박스가 밀리지 않았다.)
+    [Server]
+    private void ApplyExplosionForceToObject(Rigidbody2D targetRb, Vector2 direction)
+    {
+        NetworkIdentity targetIdentity = targetRb.GetComponent<NetworkIdentity>();
+
+        if (targetIdentity == null || IsServerAuthoritativePhysics(targetIdentity))
+        {
+            targetRb.AddForce(direction * explosionForce, ForceMode2D.Impulse);
+            return;
+        }
+
+        RpcApplyExplosionForce(targetIdentity.netId, direction, explosionForce);
+    }
+
+    // 대상이 서버 권한 물리인지 판별한다.
+    // NetworkTransform이 ServerToClient(서버 권한)로 설정돼 있으면 서버가 물리를 시뮬레이션한다.
+    private static bool IsServerAuthoritativePhysics(NetworkIdentity identity)
+    {
+        NetworkTransformBase netTransform = identity.GetComponent<NetworkTransformBase>();
+
+        return netTransform != null && netTransform.syncDirection == SyncDirection.ServerToClient;
+    }
+
+    [ClientRpc]
+    private void RpcApplyExplosionForce(uint targetNetId, Vector2 direction, float force)
+    {
+        // 이 경로는 서버에서 힘을 주지 않으므로, 호스트를 포함한 모든 클라이언트가 직접 적용한다.
+        if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
+            return;
+
+        AddExplosionImpulse(identity, direction, force);
+    }
+
+    private static void AddExplosionImpulse(
+        NetworkIdentity identity,
+        Vector2 direction,
+        float force
+    )
+    {
+        Rigidbody2D targetRb = identity.GetComponent<Rigidbody2D>();
+
+        if (targetRb == null)
+            return;
+
+        targetRb.AddForce(direction * force, ForceMode2D.Impulse);
     }
 
     [Server]
@@ -167,30 +213,13 @@ public class BoomBox : NetworkBehaviour
         if (playerIdentity == null)
             return false;
 
-        if (!playerIdentity.CompareTag("Player"))
-            return false;
-
-        if (playerIdentity.connectionToClient == null)
-        {
-            Debug.LogWarning(
-                $"[BoomBox] Player connection is null. "
-                    + $"player={playerIdentity.name}, netId={playerIdentity.netId}, "
-                    + $"isServer={NetworkServer.active}"
-            );
-
-            return false;
-        }
-
-        return true;
+        return playerIdentity.CompareTag("Player");
     }
 
-    [TargetRpc]
-    private void TargetApplyExplosionForce(
-        NetworkConnectionToClient target,
-        uint targetNetId,
-        Vector2 direction,
-        float force
-    )
+    // 플레이어는 NetworkTransform이 ClientToServer(클라이언트 권한)라 소유자만 물리를 시뮬레이션한다.
+    // 따라서 전 클라이언트에 브로드캐스트하되, 힘은 자기 로컬 플레이어에게만 적용한다.
+    [ClientRpc]
+    private void ClientApplyExplosionForce(uint targetNetId, Vector2 direction, float force)
     {
         if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
             return;
@@ -198,12 +227,7 @@ public class BoomBox : NetworkBehaviour
         if (!identity.isLocalPlayer)
             return;
 
-        Rigidbody2D targetRb = identity.GetComponent<Rigidbody2D>();
-
-        if (targetRb == null)
-            return;
-
-        targetRb.AddForce(direction * force, ForceMode2D.Impulse);
+        AddExplosionImpulse(identity, direction, force);
     }
 
     private void StopBoomBoxPhysics()
