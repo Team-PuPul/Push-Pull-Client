@@ -52,7 +52,7 @@ public class ButtonPanel : MonoBehaviour
     }
 
     // 마지막 선택 버튼이 기록돼 있으면 그 위치를, 없으면(첫 진입) 첫 버튼을 선택
-    private void SelectButton()
+    protected void SelectButton()
     {
         if (firstSelectButton == null)
         {
@@ -66,7 +66,7 @@ public class ButtonPanel : MonoBehaviour
     }
 
     // 패널을 떠나기 직전 현재 선택된 버튼을 기록 (이 패널 소속 버튼일 때만)
-    private void SaveSelection()
+    protected void SaveSelection()
     {
         if (EventSystem.current == null || !saveLastButton) return;
 
