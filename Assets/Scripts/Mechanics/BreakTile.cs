@@ -62,8 +62,10 @@ public class BreakTile : NetworkBehaviour
             time += Time.deltaTime;
 
             float damper = 1f - (time / shakeDuration);
-            Vector3 randomOffset = Random.insideUnitSphere * shakeStrength * damper;
-            transform.localPosition = origin + randomOffset;
+            // 2D 게임이므로 Z축이 흔들리지 않도록 insideUnitCircle을 사용한다.
+            // (insideUnitSphere는 Z에도 오프셋을 줘 스프라이트 렌더링 순서가 어긋날 수 있다.)
+            Vector2 randomOffset = Random.insideUnitCircle * shakeStrength * damper;
+            transform.localPosition = origin + (Vector3)randomOffset;
 
             yield return null;
         }
