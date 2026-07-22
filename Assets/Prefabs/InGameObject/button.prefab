@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3735601540671799088}
   - component: {fileID: 7840431538710725913}
   - component: {fileID: 2443577697494233738}
+  - component: {fileID: 5273053561769517197}
   m_Layer: 0
   m_Name: button
   m_TagString: Untagged
@@ -98,7 +99,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b6d1393cb46f8742863393ac80b5a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   disappearObj: {fileID: 0}
+  pressableMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &2443577697494233738
 Animator:
   serializedVersion: 5
@@ -120,3 +127,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5273053561769517197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3082528761631367711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 3131463618
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

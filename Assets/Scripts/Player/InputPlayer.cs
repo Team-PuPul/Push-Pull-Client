@@ -506,6 +506,16 @@ public class InputPlayer : NetworkBehaviour
     [Command]
     private void CmdMoveTarget(uint targetNetId, Vector3 targetPos)
     {
+        // 서버 권한 물리 오브젝트(NetworkTransform이 ServerToClient)는 서버에서만 위치를 옮기고
+        // NetworkTransform이 모든 클라이언트에 위치를 동기화한다.
+        if (NetworkServer.spawned.TryGetValue(targetNetId, out NetworkIdentity identity)
+            && IsServerAuthoritativePhysics(identity))
+        {
+            identity.transform.position = targetPos;
+            return;
+        }
+
+        // 그 외 오브젝트는 기존 방식대로 전 클라이언트에 위치를 직접 반영한다.
         RpcMoveTarget(targetNetId, targetPos);
     }
 
@@ -525,15 +535,29 @@ public class InputPlayer : NetworkBehaviour
     [Command]
     private void CmdApplyPush(uint targetNetId, Vector2 direction, float power)
     {
+        // 서버 권한 물리 오브젝트는 서버에서만 힘을 적용하고 NetworkTransform이 위치를 동기화한다.
+        // (전 클라이언트가 각자 힘을 적용하면 물리 시뮬레이션이 어긋나 위치가 벌어진다.)
+        if (NetworkServer.spawned.TryGetValue(targetNetId, out NetworkIdentity identity)
+            && IsServerAuthoritativePhysics(identity))
+        {
+            ApplyPushForceTo(identity, direction, power);
+            return;
+        }
+
+        // 그 외 오브젝트는 기존 방식대로 전 클라이언트가 동일한 힘을 적용한다.
         RpcApplyPush(targetNetId, direction, power);
     }
 
     [ClientRpc]
     private void RpcApplyPush(uint targetNetId, Vector2 direction, float power)
     {
-        if (!NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
-            return;
+        if (NetworkClient.spawned.TryGetValue(targetNetId, out NetworkIdentity identity))
+            ApplyPushForceTo(identity, direction, power);
+    }
 
+    // 대상 Rigidbody2D에 밀치기 힘(옆 방향 + 살짝 위)을 가한다.
+    private void ApplyPushForceTo(NetworkIdentity identity, Vector2 direction, float power)
+    {
         Rigidbody2D targetBody = identity.GetComponent<Rigidbody2D>();
 
         if (targetBody == null)
@@ -541,6 +565,16 @@ public class InputPlayer : NetworkBehaviour
 
         Vector2 impulse = direction * power + Vector2.up * power / 2f;
         targetBody.AddForce(impulse, ForceMode2D.Impulse);
+    }
+
+    // 대상이 서버 권한 물리인지 판별한다.
+    // NetworkTransform이 ServerToClient(서버 권한)로 설정돼 있으면 서버가 물리를 시뮬레이션한다.
+    private static bool IsServerAuthoritativePhysics(NetworkIdentity identity)
+    {
+        NetworkTransformBase netTransform = identity.GetComponent<NetworkTransformBase>();
+
+        return netTransform != null
+            && netTransform.syncDirection == SyncDirection.ServerToClient;
     }
 
     // PlayerInput의 기존 Unity Event 연결을 유지하는 전달용 콜백들이다.
