@@ -646,7 +646,7 @@ MonoBehaviour:
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
   useTextColorTransition: 0
   targetText: {fileID: 0}
-  disableCanvas: {fileID: 2079848404721737548}
+  disableCanvas: {fileID: 7088102347066114707}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
@@ -1106,7 +1106,7 @@ MonoBehaviour:
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
   useTextColorTransition: 0
   targetText: {fileID: 0}
-  disableCanvas: {fileID: 2079848404721737548}
+  disableCanvas: {fileID: 7088102347066114707}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
@@ -1258,7 +1258,7 @@ GameObject:
   - component: {fileID: 2919474151721429885}
   - component: {fileID: 1947556912837801848}
   - component: {fileID: 7423432086963588853}
-  - component: {fileID: 2079848404721737548}
+  - component: {fileID: 7088102347066114707}
   m_Layer: 5
   m_Name: ClearCanvas
   m_TagString: Untagged
@@ -1362,7 +1362,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &2079848404721737548
+--- !u!114 &7088102347066114707
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1371,10 +1371,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6645052247177348628}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa2d91a1d15b844e995ca17ae9bfcc8, type: 3}
+  m_Script: {fileID: 11500000, guid: de32ccab2d00cb448baacb8db4059b21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMainCanva: 1
+  isMainCanva: 0
   fadeDuration: 0.2
   firstSelectButton: {fileID: 4936991244158904418}
 --- !u!1 &6682567541939149738
@@ -1681,7 +1681,7 @@ MonoBehaviour:
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
   useTextColorTransition: 0
   targetText: {fileID: 0}
-  disableCanvas: {fileID: 2079848404721737548}
+  disableCanvas: {fileID: 7088102347066114707}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
@@ -1822,7 +1822,7 @@ MonoBehaviour:
   soundInfo: {fileID: 11400000, guid: 8a2d20e24f1d23846b3636a19213c375, type: 2}
   useTextColorTransition: 0
   targetText: {fileID: 0}
-  disableCanvas: {fileID: 2079848404721737548}
+  disableCanvas: {fileID: 7088102347066114707}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}

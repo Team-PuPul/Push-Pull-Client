@@ -17,8 +17,8 @@ public class ButtonCanvas : MonoBehaviour
     [SerializeField] protected float fadeDuration = 0.2f;
     [SerializeField] private Button firstSelectButton;
 
-    private CanvasGroup canvasGroup;
-    private Canvas canvas;
+    protected CanvasGroup canvasGroup;
+    protected Canvas canvas;
 
     // 이 캔버스를 떠날 때 마지막으로 선택돼 있던 버튼 (돌아왔을 때 복원용)
     private GameObject lastSelectedButton;
@@ -29,7 +29,7 @@ public class ButtonCanvas : MonoBehaviour
         canvas = GetComponent<Canvas>();
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         if (isMainCanva) EnableCanvas();
         else DisableCanvas();
