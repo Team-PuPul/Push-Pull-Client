@@ -47,14 +47,10 @@ public class DisappearButton : NetworkBehaviour
         if (!IsPressable(collision))
             return;
 
+        // SyncVar만 변경하면 호스트를 포함한 모든 클라이언트에서 hook이 호출되어
+        // 벽 비활성화·애니메이션이 반영된다. (수동 호출은 호스트에서 중복 실행을 유발한다.)
         isPressed = true;
         isWallActive = false;
-
-        // 호스트 화면에도 즉시 반영한다.
-        ApplyWallActive(false);
-
-        if (anim != null)
-            anim.Play("Push");
     }
 
     // 트리거 대상이 버튼을 누를 수 있는 오브젝트인지 판별한다.

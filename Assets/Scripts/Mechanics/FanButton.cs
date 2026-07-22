@@ -70,13 +70,9 @@ public class FanButton : NetworkBehaviour
         if (isWindActive == active)
             return;
 
+        // SyncVar만 변경하면 호스트를 포함한 모든 클라이언트에서 hook이 호출되어
+        // 바람 on/off·애니메이션이 반영된다. (수동 호출은 호스트에서 중복 실행을 유발한다.)
         isWindActive = active;
-
-        // 호스트 화면에도 즉시 반영한다.
-        ApplyWindActive(active);
-
-        if (anim != null)
-            anim.Play(active ? "Push" : "Pull");
     }
 
     bool IsPressable(Collider2D collision)

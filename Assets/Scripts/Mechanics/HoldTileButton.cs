@@ -72,11 +72,9 @@ public class HoldTileButton : NetworkBehaviour
         if (isPressed == pressed)
             return;
 
+        // SyncVar만 변경하면 호스트를 포함한 모든 클라이언트에서 hook이 호출되어
+        // 버튼 눌림 애니메이션이 반영된다. (수동 호출은 호스트에서 중복 실행을 유발한다.)
         isPressed = pressed;
-
-        // 호스트 화면에도 즉시 반영한다.
-        if (anim != null)
-            anim.Play(pressed ? "Push" : "Pull");
     }
 
     bool IsPressable(Collider2D collision)
