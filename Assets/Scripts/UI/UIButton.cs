@@ -187,7 +187,13 @@ public class UIButton : Button
                 enableCanvas = FindObjectsOfType<ButtonCanvas>().Where(canvas => canvas.MainCanvas == true).First();
                 changeCanvas(); break;
             case ButtonType.Quit:
-                Application.Quit(); break;
+#if UNITY_EDITOR
+                // 에디터에서는 Application.Quit()이 동작하지 않으므로 플레이 모드를 종료한다.
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+                break;
         }
     }
 
