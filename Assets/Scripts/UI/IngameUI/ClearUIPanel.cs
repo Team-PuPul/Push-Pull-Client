@@ -3,6 +3,17 @@
 public class ClearUIMain : ButtonPanel
 {
     [SerializeField] private ClearUIMainPanel mainPanel;
+
+    private LevelLoader levelLoader;
+    private SteamLobby steamLobby;
+
+    protected override void Start()
+    {
+        base.Start();
+        levelLoader = FindObjectOfType<LevelLoader>();
+        steamLobby = FindObjectOfType<SteamLobby>();
+    }
+
     public override void EnablePanel()
     {
         if(mainPanel != null) 
@@ -21,6 +32,7 @@ public class ClearUIMain : ButtonPanel
 
     public void ReturnMain()
     {
-        Debug.Log("메인 화면으로 돌아가기");
+        steamLobby?.LeaveCurrentRoom();
+        levelLoader.LoadScene("MainUI");
     }
 }
