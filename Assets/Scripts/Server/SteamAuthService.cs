@@ -7,13 +7,17 @@ public sealed class SteamAuthService : MonoBehaviour
 {
     private const string SessionIdKey = "sessionId";
     private const float SteamInitializeTimeout = 10f;
+    private const int MaxLoginAttempts = 3;
+    private const float LoginRetryDelay = 1f;
 
     [SerializeField]
     private APIConnector apiConnector;
 
     private Callback<GetTicketForWebApiResponse_t> ticketCallback;
     private HAuthTicket authTicket = HAuthTicket.Invalid;
+    private Coroutine retryLoginCoroutine;
     private bool isLoggingIn;
+    private int loginAttemptCount;
 
     public bool IsLoggedIn =>
         PlayerPrefs.HasKey(SessionIdKey)
@@ -34,6 +38,7 @@ public sealed class SteamAuthService : MonoBehaviour
         if (!SteamManager.Initialized)
         {
             Debug.LogError("[SteamAuth] Steam 초기화에 실패했습니다.");
+            Login();
             yield break;
         }
 
@@ -51,12 +56,23 @@ public sealed class SteamAuthService : MonoBehaviour
 
     public void Login()
     {
+        if (isLoggingIn || retryLoginCoroutine != null)
+            return;
+
+        loginAttemptCount = 0;
+        StartLoginAttempt();
+    }
+
+    private void StartLoginAttempt()
+    {
         if (isLoggingIn)
             return;
 
+        loginAttemptCount++;
+
         if (!SteamManager.Initialized)
         {
-            Debug.LogError("[SteamAuth] Steam이 초기화되지 않았습니다.");
+            Fail("Steam이 초기화되지 않았습니다.");
             return;
         }
 
@@ -66,7 +82,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
             if (apiConnector == null)
             {
-                Debug.LogError("[SteamAuth] APIConnector를 찾을 수 없습니다.");
+                Fail("APIConnector를 찾을 수 없습니다.");
                 return;
             }
         }
@@ -77,6 +93,8 @@ public sealed class SteamAuthService : MonoBehaviour
 
         PlayerPrefs.DeleteKey(SessionIdKey);
         PlayerPrefs.Save();
+
+        Debug.Log($"[SteamAuth] 로그인 시도 {loginAttemptCount}/{MaxLoginAttempts}");
 
         // HTTP 백엔드의 AuthenticateUserTicket 검증용 티켓
         authTicket = SteamUser.GetAuthTicketForWebApi(string.Empty);
@@ -161,6 +179,7 @@ public sealed class SteamAuthService : MonoBehaviour
         PlayerPrefs.Save();
 
         isLoggingIn = false;
+        loginAttemptCount = 0;
         CancelTicket();
 
         Debug.Log("[SteamAuth] 로그인 성공");
@@ -175,7 +194,57 @@ public sealed class SteamAuthService : MonoBehaviour
 
         CancelTicket();
 
-        Debug.LogError($"[SteamAuth] {error}");
+        if (IsTooManyRequests(error))
+        {
+            Debug.LogError(
+                $"[SteamAuth] 로그인 실패 ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+            );
+            Debug.LogError("[SteamAuth] 요청 제한(429)으로 게임을 종료합니다.");
+            QuitGame();
+            return;
+        }
+
+        if (loginAttemptCount < MaxLoginAttempts)
+        {
+            Debug.LogWarning(
+                $"[SteamAuth] 로그인 실패 ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+                    + $" {LoginRetryDelay}초 후 재시도합니다."
+            );
+
+            if (isActiveAndEnabled)
+                retryLoginCoroutine = StartCoroutine(RetryLoginAfterDelay());
+
+            return;
+        }
+
+        Debug.LogError(
+            $"[SteamAuth] 로그인 실패 ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+        );
+        Debug.LogError("[SteamAuth] 로그인 재시도 한도를 초과해 게임을 종료합니다.");
+        QuitGame();
+    }
+
+    private IEnumerator RetryLoginAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(LoginRetryDelay);
+
+        retryLoginCoroutine = null;
+        StartLoginAttempt();
+    }
+
+    private static bool IsTooManyRequests(string error)
+    {
+        return !string.IsNullOrWhiteSpace(error)
+            && error.TrimStart().StartsWith("429", System.StringComparison.Ordinal);
+    }
+
+    private static void QuitGame()
+    {
+#if UNITY_EDITOR
+        Debug.LogWarning("[SteamAuth] 에디터에서는 자동 종료를 건너뜁니다.");
+#else
+        Application.Quit();
+#endif
     }
 
     private void CancelTicket()
@@ -208,6 +277,12 @@ public sealed class SteamAuthService : MonoBehaviour
     {
         // SteamManager의 안내대로 OnDestroy에서는
         // Steamworks API를 호출하지 않는다.
+        if (retryLoginCoroutine != null)
+        {
+            StopCoroutine(retryLoginCoroutine);
+            retryLoginCoroutine = null;
+        }
+
         CancelTicket();
 
         ticketCallback?.Dispose();
