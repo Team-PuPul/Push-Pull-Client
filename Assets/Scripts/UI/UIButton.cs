@@ -200,16 +200,18 @@ public class UIButton : Button
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());
     private void changePanel() => StartCoroutine(changePanelCoroutine());
 
+    // WaitForSecondsRealtime: 일시정지로 timeScale이 0이 되면 WaitForSeconds가
+    // 영원히 대기해 캔버스/패널 전환이 멈추므로 실시간 기준으로 기다린다.
     private IEnumerator changeCanvasCoroutine()
     {
         disableCanvas.FadeIn();
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSecondsRealtime(0.2f);
         enableCanvas.EnableCanvas();
     }
     private IEnumerator changePanelCoroutine()
     {
         disablePanel.DisablePanel();
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSecondsRealtime(0.2f);
         enablePanel.EnablePanel();
     }
 }

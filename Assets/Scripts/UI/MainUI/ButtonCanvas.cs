@@ -13,6 +13,9 @@ public class ButtonCanvas : MonoBehaviour
             return isMainCanva;
         }
     }
+    // 이 캔버스가 현재 화면에 표시 중인지 여부 (PauseController의 ESC 토글 판단용)
+    public bool IsVisible => canvas != null && canvas.enabled;
+
     [SerializeField] private bool isMainCanva = false;
     [SerializeField] protected float fadeDuration = 0.2f;
     [SerializeField] private Button firstSelectButton;
@@ -75,14 +78,17 @@ public class ButtonCanvas : MonoBehaviour
         canvasGroup.alpha = 0f;
     }
     
+    // SetUpdate(true): 일시정지로 timeScale이 0이 되어도 페이드가 진행되도록 한다.
+    // (timeScale 0에서는 기본 DOTween 트윈이 멈춰 캔버스가 alpha 0인 채로 남는다)
     public void FadeOut()
     {
-        canvasGroup.DOFade(1f, fadeDuration);
+        canvasGroup.DOFade(1f, fadeDuration).SetUpdate(true);
     }
     public void FadeIn()
     {
         SaveSelection();
         canvasGroup.DOFade(0f, fadeDuration)
+            .SetUpdate(true)
             .OnComplete(() =>
             {
                 canvas.enabled = false;
