@@ -20,14 +20,40 @@ public class Monster : MonoBehaviour
 
     Coroutine moveCoroutine;
     bool isDead = false;
+    bool isLoadingScene = false;
 
-    void Start()
+    IEnumerator Start()
     {
         rigid = GetComponent<Rigidbody2D>();
-        levelLoader = FindObjectOfType<LevelLoader>();
-        bs = FindObjectOfType<BGMScript>();
+        bs = FindObjectOfType<BGMScript>(true);
 
         moveCoroutine = StartCoroutine(Move());
+        yield return WaitForActiveLevelLoader();
+    }
+
+    IEnumerator WaitForActiveLevelLoader()
+    {
+        while (!TryCacheActiveLevelLoader())
+        {
+            yield return null;
+        }
+    }
+
+    bool TryCacheActiveLevelLoader()
+    {
+        if (levelLoader != null && levelLoader.isActiveAndEnabled)
+            return true;
+
+        foreach (LevelLoader loader in FindObjectsOfType<LevelLoader>(true))
+        {
+            if (!loader.isActiveAndEnabled)
+                continue;
+
+            levelLoader = loader;
+            return true;
+        }
+
+        return false;
     }
 
     IEnumerator Move()
@@ -108,8 +134,21 @@ public class Monster : MonoBehaviour
 
     void KillPlayer(MonoBehaviour player)
     {
+        if (isLoadingScene)
+            return;
+
+        isLoadingScene = true;
         player.SendMessage("Die");
-        bs.FadeOut();
+
+        if (bs != null)
+            bs.FadeOut();
+
+        StartCoroutine(LoadCurrentSceneWhenReady());
+    }
+
+    IEnumerator LoadCurrentSceneWhenReady()
+    {
+        yield return WaitForActiveLevelLoader();
         levelLoader.LoadScene(SceneManager.GetActiveScene().name);
     }
 
