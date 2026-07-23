@@ -23,7 +23,7 @@ public class ButtonPanel : MonoBehaviour
         canvasGroup = GetComponent<CanvasGroup>();
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         if (!baseEnabled) DisablePanel();
         else EnablePanel();

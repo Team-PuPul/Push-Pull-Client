@@ -26,7 +26,8 @@ public class PauseCanvas : ButtonCanvas
         // 인스펙터 미할당 시 NullReferenceException 방지
         if (backgroundCanvasGroup != null)
         {
-            backgroundCanvasGroup.DOFade(value, fadeDuration);
+            // timeScale 0에서도 배경 페이드가 진행되도록 SetUpdate(true) 적용
+            backgroundCanvasGroup.DOFade(value, fadeDuration).SetUpdate(true);
         }
     }
 }
