@@ -134,31 +134,31 @@ PrefabInstance:
       propertyPath: sceneId
       value: 1863470195
       objectReference: {fileID: 0}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: clip
       value: 
       objectReference: {fileID: 8300000, guid: 79e6baad2fd414b82a6d49ce1568d2e5, type: 3}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: whiteTileList.Array.size
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: blackTileList.Array.data[0]
       value: 
       objectReference: {fileID: 1702850997}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: blackTileList.Array.data[1]
       value: 
       objectReference: {fileID: 119366487}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: whiteTileList.Array.data[0]
       value: 
       objectReference: {fileID: 377914811}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: whiteTileList.Array.data[1]
       value: 
       objectReference: {fileID: 613560104}
-    - target: {fileID: 497040903696951729, guid: 9d597bf29cc06a347b21ee0af4eb4ac2, type: 3}
+    - target: {fileID: 497040903696951729, guid: 2c10018cfc3f27148ba258fcae0023da, type: 3}
       propertyPath: whiteTileList.Array.data[2]
       value: 
       objectReference: {fileID: 0}
