@@ -34,10 +34,10 @@ public class Grab : MonoBehaviour
         targetingable = true;
     }
 
-
     private void Update()
     {
-        if (Time.timeScale == 0) return;
+        if (Time.timeScale == 0)
+            return;
 
         if (Vector3.Distance(gameObject.transform.position, player.transform.position) <= 1)
         {
@@ -48,19 +48,12 @@ public class Grab : MonoBehaviour
 
         if (holdGrab && grabing && Target != null)
         {
-            // 네트워크 오브젝트(상대 플레이어·박스 등)는 서버를 거쳐 위치를 동기화하고,
-            // 로컬 전용 오브젝트만 직접 위치를 옮긴다.
-            // (기존에는 상대 플레이어를 잡았을 때만 동기화돼 interactive 박스가 로컬에만 반영됐다.)
             if (hasNetworkTarget)
                 player.SyncMoveTarget(cachedTargetNetId, gameObject.transform.position);
             else
                 Target.transform.position = gameObject.transform.position;
         }
     }
-
-    // ───────────────────────────────────────────
-    // Target 캐싱
-    // ───────────────────────────────────────────
 
     private void SetTarget(GameObject targetObj)
     {
@@ -86,13 +79,19 @@ public class Grab : MonoBehaviour
         hasNetworkTarget = false;
     }
 
-    // ───────────────────────────────────────────
-    // Grab 실행
-    // ───────────────────────────────────────────
+    private bool IsPullingPlayer(InputPlayer targetPlayer)
+    {
+        if (targetPlayer == null || !holdGrab || !grabing || Target == null)
+            return false;
+
+        InputPlayer targetRoot = Target.GetComponentInParent<InputPlayer>();
+        return targetRoot == targetPlayer;
+    }
 
     public void DOGrab()
     {
-        if (!player.isLocalPlayer) return;
+        if (!player.isLocalPlayer)
+            return;
 
         if (!grabing)
         {
@@ -101,20 +100,26 @@ public class Grab : MonoBehaviour
         }
     }
 
-    // ───────────────────────────────────────────
-    // 충돌 감지
-    // ───────────────────────────────────────────
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!player.isLocalPlayer) return;
+        if (!player.isLocalPlayer)
+            return;
 
         if (collision.gameObject.CompareTag("Player"))
         {
             var otherGrab = collision.gameObject.GetComponentInChildren<Grab>();
+
+            if (grabing && otherGrab != null && otherGrab.IsPullingPlayer(player))
+            {
+                StopAllCoroutines();
+                StartCoroutine(BackGrab());
+                return;
+            }
+
             if (otherGrab != null && !otherGrab.GrabPlayer)
             {
                 GrabPlayer = true;
+
                 if (grabing && targetingable)
                 {
                     SetTarget(collision.gameObject);
@@ -143,10 +148,6 @@ public class Grab : MonoBehaviour
             StartCoroutine(BackGrab());
         }
     }
-
-    // ───────────────────────────────────────────
-    // 코루틴
-    // ───────────────────────────────────────────
 
     public IEnumerator GoGrab()
     {
