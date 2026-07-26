@@ -789,7 +789,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  requiredPlayers: 2
+  requiredPlayers: 1
   isCleared: 0
   clearUI: {fileID: 2219595443857970223}
   keyCounter: {fileID: 0}
