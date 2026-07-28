@@ -23,11 +23,16 @@ using Steamworks;
 public class SteamManager : MonoBehaviour {
 #if !DISABLESTEAMWORKS
 	protected static bool s_EverInitialized = false;
+	protected static bool s_IsShuttingDown = false;
 
 	protected static SteamManager s_instance;
 	protected static SteamManager Instance {
 		get {
 			if (s_instance == null) {
+				if (s_IsShuttingDown) {
+					return null;
+				}
+
 				return new GameObject("SteamManager").AddComponent<SteamManager>();
 			}
 			else {
@@ -39,7 +44,8 @@ public class SteamManager : MonoBehaviour {
 	protected bool m_bInitialized = false;
 	public static bool Initialized {
 		get {
-			return Instance.m_bInitialized;
+			SteamManager instance = Instance;
+			return instance != null && instance.m_bInitialized;
 		}
 	}
 
@@ -56,6 +62,7 @@ public class SteamManager : MonoBehaviour {
 	private static void InitOnPlayMode()
 	{
 		s_EverInitialized = false;
+		s_IsShuttingDown = false;
 		s_instance = null;
 	}
 #endif
@@ -150,11 +157,16 @@ public class SteamManager : MonoBehaviour {
 	// OnApplicationQuit gets called too early to shutdown the SteamAPI.
 	// Because the SteamManager should be persistent and never disabled or destroyed we can shutdown the SteamAPI here.
 	// Thus it is not recommended to perform any Steamworks work in other OnDestroy functions as the order of execution can not be garenteed upon Shutdown. Prefer OnDisable().
+	protected virtual void OnApplicationQuit() {
+		s_IsShuttingDown = true;
+	}
+
 	protected virtual void OnDestroy() {
 		if (s_instance != this) {
 			return;
 		}
 
+		s_IsShuttingDown = true;
 		s_instance = null;
 
 		if (!m_bInitialized) {
