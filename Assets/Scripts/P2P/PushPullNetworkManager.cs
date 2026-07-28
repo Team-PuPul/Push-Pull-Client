@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PushPullNetworkManager : NetworkManager
 {
@@ -24,6 +25,11 @@ public class PushPullNetworkManager : NetworkManager
 
     [SerializeField]
     private string blackSpawnName = "BlackStartPoint";
+
+    private Coroutine stageSpawnPlacementCoroutine;
+    private bool hasPendingStageSpawnPlacement;
+    private int stageSpawnPlacementVersion;
+    private string pendingStageSceneName;
 
     public override void Awake()
     {
@@ -115,37 +121,108 @@ public class PushPullNetworkManager : NetworkManager
                 + $"scene={sceneName}, isServer={NetworkServer.active}"
         );
 
-        if (!sceneName.StartsWith("Stage"))
+        if (!IsStageScene(sceneName))
+        {
+            ClearPendingStageSpawnPlacement();
             return;
+        }
 
-        StartCoroutine(MovePlayersToStageSpawnPointsAfterSceneLoad());
+        BeginStageSpawnPlacement(sceneName);
     }
 
-    private IEnumerator MovePlayersToStageSpawnPointsAfterSceneLoad()
+    public override void OnServerReady(NetworkConnectionToClient conn)
     {
-        const float timeout = 3f;
+        base.OnServerReady(conn);
+
+        if (!NetworkServer.active || !hasPendingStageSpawnPlacement)
+            return;
+
+        if (!IsStageScene(SceneManager.GetActiveScene().name))
+            return;
+
+        TryStartStageSpawnPlacementCoroutine();
+    }
+
+    private void BeginStageSpawnPlacement(string sceneName)
+    {
+        if (stageSpawnPlacementCoroutine != null)
+        {
+            StopCoroutine(stageSpawnPlacementCoroutine);
+            stageSpawnPlacementCoroutine = null;
+        }
+
+        hasPendingStageSpawnPlacement = true;
+        pendingStageSceneName = sceneName;
+        stageSpawnPlacementVersion++;
+
+        TryStartStageSpawnPlacementCoroutine();
+    }
+
+    private void TryStartStageSpawnPlacementCoroutine()
+    {
+        if (!hasPendingStageSpawnPlacement || stageSpawnPlacementCoroutine != null)
+            return;
+
+        stageSpawnPlacementCoroutine = StartCoroutine(
+            MovePlayersToStageSpawnPointsWhenReady(
+                stageSpawnPlacementVersion,
+                pendingStageSceneName
+            )
+        );
+    }
+
+    private IEnumerator MovePlayersToStageSpawnPointsWhenReady(
+        int placementVersion,
+        string sceneName
+    )
+    {
+        const float timeout = 5f;
         float startTime = Time.time;
 
-        while (!AllPlayersHaveIdentity())
+        yield return null;
+
+        while (!AllPlayersReadyWithIdentity() || !StageSpawnPointsExist())
         {
+            if (!IsCurrentStageSpawnPlacement(placementVersion))
+            {
+                ClearStageSpawnPlacementCoroutine(placementVersion);
+                yield break;
+            }
+
             if (Time.time - startTime > timeout)
             {
                 Debug.LogError(
-                    $"[PushPullNetworkManager] Player identity wait timeout. "
+                    $"[PushPullNetworkManager] Stage spawn placement timeout. "
+                        + $"scene={sceneName}, "
                         + $"connectionCount={NetworkServer.connections.Count}, "
+                        + $"playersReady={AllPlayersReadyWithIdentity()}, "
+                        + $"spawnPointsReady={StageSpawnPointsExist()}, "
                         + $"isServer={NetworkServer.active}"
                 );
 
+                hasPendingStageSpawnPlacement = false;
+                ClearStageSpawnPlacementCoroutine(placementVersion);
                 yield break;
             }
 
             yield return null;
         }
 
+        yield return null;
+
+        if (!IsCurrentStageSpawnPlacement(placementVersion))
+        {
+            ClearStageSpawnPlacementCoroutine(placementVersion);
+            yield break;
+        }
+
         MovePlayersToStageSpawnPoints();
+        hasPendingStageSpawnPlacement = false;
+
+        ClearStageSpawnPlacementCoroutine(placementVersion);
     }
 
-    private bool AllPlayersHaveIdentity()
+    private bool AllPlayersReadyWithIdentity()
     {
         if (NetworkServer.connections.Count == 0)
             return false;
@@ -153,16 +230,66 @@ public class PushPullNetworkManager : NetworkManager
         foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
         {
             if (connection == null)
-                continue;
+                return false;
 
-            if (connection.identity == null)
+            if (!connection.isReady || connection.identity == null)
                 return false;
         }
 
         return true;
     }
 
-    private void MovePlayersToStageSpawnPoints()
+    private bool StageSpawnPointsExist()
+    {
+        return FindSpawnPoint(whiteSpawnName) != null && FindSpawnPoint(blackSpawnName) != null;
+    }
+
+    private bool IsCurrentStageSpawnPlacement(int placementVersion)
+    {
+        return hasPendingStageSpawnPlacement && placementVersion == stageSpawnPlacementVersion;
+    }
+
+    private void ClearStageSpawnPlacementCoroutine(int placementVersion)
+    {
+        if (placementVersion == stageSpawnPlacementVersion)
+            stageSpawnPlacementCoroutine = null;
+    }
+
+    private void ClearPendingStageSpawnPlacement()
+    {
+        hasPendingStageSpawnPlacement = false;
+        pendingStageSceneName = null;
+
+        if (stageSpawnPlacementCoroutine == null)
+            return;
+
+        StopCoroutine(stageSpawnPlacementCoroutine);
+        stageSpawnPlacementCoroutine = null;
+    }
+
+    private bool IsStageScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return false;
+
+        string normalizedSceneName = sceneName.Replace('\\', '/');
+        int slashIndex = normalizedSceneName.LastIndexOf('/');
+
+        if (slashIndex >= 0)
+            normalizedSceneName = normalizedSceneName.Substring(slashIndex + 1);
+
+        const string sceneExtension = ".unity";
+
+        if (normalizedSceneName.EndsWith(sceneExtension))
+            normalizedSceneName = normalizedSceneName.Substring(
+                0,
+                normalizedSceneName.Length - sceneExtension.Length
+            );
+
+        return normalizedSceneName.StartsWith("Stage");
+    }
+
+    private bool MovePlayersToStageSpawnPoints()
     {
         Transform whiteSpawn = FindSpawnPoint(whiteSpawnName);
         Transform blackSpawn = FindSpawnPoint(blackSpawnName);
@@ -177,7 +304,7 @@ public class PushPullNetworkManager : NetworkManager
                     + $"isClient={NetworkClient.active}"
             );
 
-            return;
+            return false;
         }
 
         List<NetworkConnectionToClient> connections = new List<NetworkConnectionToClient>(
@@ -208,16 +335,7 @@ public class PushPullNetworkManager : NetworkManager
 
             Transform spawn = i == 0 ? whiteSpawn : blackSpawn;
 
-            NetworkTransformBase networkTransform = player.GetComponent<NetworkTransformBase>();
-
-            if (networkTransform != null)
-            {
-                networkTransform.ServerTeleport(spawn.position, spawn.rotation);
-            }
-            else
-            {
-                player.transform.SetPositionAndRotation(spawn.position, spawn.rotation);
-            }
+            ApplyPlayerStageSpawn(player, spawn.position, spawn.rotation);
 
             Debug.Log(
                 $"[PushPullNetworkManager] Move player to spawn. "
@@ -227,6 +345,47 @@ public class PushPullNetworkManager : NetworkManager
                     + $"position={spawn.position}"
             );
         }
+
+        return true;
+    }
+
+    private void ApplyPlayerStageSpawn(
+        NetworkIdentity player,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        InputPlayer inputPlayer = player.GetComponent<InputPlayer>();
+
+        if (inputPlayer != null)
+        {
+            inputPlayer.ServerApplyStageSpawnState(position, rotation);
+            return;
+        }
+
+        NetworkTransformBase networkTransform = player.GetComponent<NetworkTransformBase>();
+
+        if (networkTransform != null)
+            networkTransform.ServerTeleport(position, rotation);
+        else
+            player.transform.SetPositionAndRotation(position, rotation);
+
+        ResetRigidbody2D(player.GetComponent<Rigidbody2D>(), position, rotation);
+    }
+
+    private void ResetRigidbody2D(
+        Rigidbody2D body,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        if (body == null)
+            return;
+
+        body.velocity = Vector2.zero;
+        body.angularVelocity = 0f;
+        body.position = position;
+        body.SetRotation(rotation.eulerAngles.z);
     }
 
     private Transform FindSpawnPoint(string spawnName)
