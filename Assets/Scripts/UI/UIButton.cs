@@ -130,6 +130,11 @@ public class UIButton : Button
     private void PlayHover()
     {
         if (_interactableLocked) return;    // 잠금(비활성 표시) 상태에서는 호버 사운드 무음
+
+        // 숨겨진 캔버스(부모 CanvasGroup.interactable = false)의 버튼은 무음.
+        // Selectable.Select()는 상호작용 가능 여부를 확인하지 않고 선택시키므로,
+        // 화면에 없는 버튼이 선택되는 경로가 남아 있어도 소리는 나지 않게 막는다.
+        if (!IsInteractable()) return;
         if (_lastHovered == this) return;   // 같은 버튼 연속 재선택 시 무음
         _lastHovered = this;
 

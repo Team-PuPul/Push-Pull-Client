@@ -18,9 +18,13 @@ public class ButtonPanel : MonoBehaviour
     // 이 패널을 떠날 때 마지막으로 선택돼 있던 버튼 (돌아왔을 때 복원용)
     private GameObject lastSelectedButton;
 
+    // 이 패널이 속한 캔버스. 화면에 없는 캔버스에서 버튼을 선택하지 않기 위해 참조한다.
+    private ButtonCanvas ownerCanvas;
+
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
+        ownerCanvas = GetComponentInParent<ButtonCanvas>(true);
     }
 
     protected virtual void Start()
@@ -54,6 +58,15 @@ public class ButtonPanel : MonoBehaviour
     // 마지막 선택 버튼이 기록돼 있으면 그 위치를, 없으면(첫 진입) 첫 버튼을 선택
     protected void SelectButton()
     {
+        // 캔버스가 화면에 없으면 선택하지 않는다.
+        //
+        // ButtonCanvas.DisableCanvas는 canvas.enabled만 끄기 때문에 숨겨진 캔버스의
+        // 자식 패널도 Start가 실행된다. baseEnabled 패널은 그 시점에 EnablePanel →
+        // SelectButton을 타는데, 그대로 두면 보이지 않는 버튼이 선택되면서
+        // 호버 사운드가 재생되고(스테이지 진입·재시작마다) 이후 플레이어 이동 입력이
+        // UI Navigate와 겹쳐 그 버튼들 사이를 계속 이동한다.
+        if (ownerCanvas != null && !ownerCanvas.IsVisible) return;
+
         if (firstSelectButton == null)
         {
             Debug.Log($"{gameObject.name}의 첫번째 버튼이 할당되지 않았습니다!");

@@ -37,6 +37,14 @@ public class ButtonCanvas : MonoBehaviour
     {
         canvasGroup = GetComponent<CanvasGroup>();
         canvas = GetComponent<Canvas>();
+
+        // 숨겨진 캔버스의 버튼이 방향키·게임패드 네비게이션 대상에 남지 않도록
+        // 시작 시점의 상호작용 여부를 캔버스 표시 상태와 맞춘다.
+        // (Selectable은 부모 CanvasGroup의 interactable이 false면 네비게이션에서 제외된다)
+        //
+        // Start가 아니라 Awake에서 확정하는 이유: 자식 ButtonPanel의 Start가
+        // 이 캔버스의 Start보다 먼저 실행될 수 있어 그 사이가 비게 된다.
+        canvasGroup.interactable = canvas.enabled;
     }
 
     protected virtual void Start()
@@ -57,8 +65,11 @@ public class ButtonCanvas : MonoBehaviour
     {
         initialized = true;
 
-        SelectButton();
+        // SelectButton()보다 먼저 켜야 선택되는 버튼이 상호작용 가능 상태가 된다.
+        canvasGroup.interactable = true;
         canvas.enabled = true;
+
+        SelectButton();
         canvasGroup.alpha = 0f;
         FadeOut();
     }
@@ -89,6 +100,8 @@ public class ButtonCanvas : MonoBehaviour
 
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
+        // 렌더링만 끄면 자식 버튼이 네비게이션·클릭 대상으로 남으므로 상호작용도 함께 차단한다.
+        canvasGroup.interactable = false;
     }
     
     // SetUpdate(true): 일시정지로 timeScale이 0이 되어도 페이드가 진행되도록 한다.
@@ -100,6 +113,9 @@ public class ButtonCanvas : MonoBehaviour
     public void FadeIn()
     {
         SaveSelection();
+        // 페이드아웃 중에도 이 캔버스는 이미 떠난 화면이므로 상호작용을 바로 차단한다.
+        // (설정 화면으로 넘어갈 때는 DisableCanvas가 아니라 이 경로를 탄다)
+        canvasGroup.interactable = false;
         canvasGroup.DOFade(0f, fadeDuration)
             .SetUpdate(true)
             .OnComplete(() =>
