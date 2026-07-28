@@ -881,9 +881,9 @@ RectTransform:
   - {fileID: 26115639410502929}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -422.52}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5805718835390360015
@@ -1008,7 +1008,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &120640827132716968
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1471,9 +1471,9 @@ RectTransform:
   - {fileID: 6776536358364140068}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -540}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2060147778246900163
@@ -2051,9 +2051,9 @@ RectTransform:
   - {fileID: 2448632707389549626}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -657.48}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8695495802962448809
@@ -2465,7 +2465,7 @@ PrefabInstance:
     - target: {fileID: 3657092427247366269, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 99310d5299369b742a6e5d394314c7b2, type: 3}
+      objectReference: {fileID: 21300000, guid: 6fd631fe9f75da747b08d3de55db3a25, type: 3}
     - target: {fileID: 3866615102424104224, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: disableCanvas
       value: 
@@ -2737,7 +2737,7 @@ PrefabInstance:
     - target: {fileID: 9075121227564745052, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 6eec3863d421d154598b8d56c22b2629, type: 3}
+      objectReference: {fileID: 21300000, guid: 768a0677dcf995840a2da885144e1859, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
