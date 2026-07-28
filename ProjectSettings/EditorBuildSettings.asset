@@ -20,10 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InGameScenes/Stage/Stage3.unity
     guid: c77b18c94026d0b43a9d304c95002624
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/InGameScenes/Stage/Stage4.unity
     guid: 96b259478b8be9b45b50be1799182c35
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/InGameScenes/Stage/Stage5.unity
     guid: 07e2cb8db09428442b56564225f6b819
   - enabled: 0
