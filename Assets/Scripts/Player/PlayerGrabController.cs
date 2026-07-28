@@ -58,6 +58,12 @@ public class PlayerGrabController : MonoBehaviour
         if (!player.isLocalPlayer)
             return;
 
+        if (!player.CanProcessGameplay)
+        {
+            ResetStageSpawnState();
+            return;
+        }
+
         if (context.started)
             BeginGrabInput();
         else if (context.canceled)
@@ -66,7 +72,7 @@ public class PlayerGrabController : MonoBehaviour
 
     public void HandleControlInput(InputAction.CallbackContext context)
     {
-        if (player.isLocalPlayer)
+        if (player.isLocalPlayer && player.CanProcessGameplay)
             grabControlInput = context.ReadValue<Vector2>();
     }
 
@@ -195,5 +201,17 @@ public class PlayerGrabController : MonoBehaviour
             Time.deltaTime * aimSmooth
         );
         player.GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothAngle);
+    }
+
+    public void ResetStageSpawnState()
+    {
+        GrabHeld = false;
+        isGrabHolding = false;
+        grabControlInput = Vector2.zero;
+        pressStartedAt = 0f;
+        player.ChargeUI?.OffGrab();
+
+        if (player.GrabObject != null)
+            player.GrabObject.localRotation = Quaternion.identity;
     }
 }

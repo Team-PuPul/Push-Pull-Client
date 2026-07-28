@@ -78,6 +78,15 @@ public class PushGlove : MonoBehaviour
             StartCoroutine(PunchAnim());
     }
 
+    public void ResetStageSpawnState()
+    {
+        StopAllCoroutines();
+        transform.localPosition = startLocalPos;
+        _PushPower = 0f;
+        _canPush = true;
+        isAnimating = false;
+    }
+
     private IEnumerator PunchAnim()
     {
         isAnimating = true;

@@ -79,6 +79,17 @@ public class Grab : MonoBehaviour
         hasNetworkTarget = false;
     }
 
+    public void ResetStageSpawnState()
+    {
+        StopAllCoroutines();
+        transform.localPosition = StartPos;
+        holdGrab = false;
+        grabing = false;
+        targetingable = true;
+        GrabPlayer = false;
+        ClearTarget();
+    }
+
     private bool IsPullingPlayer(InputPlayer targetPlayer)
     {
         if (targetPlayer == null || !holdGrab || !grabing || Target == null)

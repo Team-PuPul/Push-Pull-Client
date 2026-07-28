@@ -254,7 +254,7 @@ public class PlayerVisualInterpolator : NetworkBehaviour
         proxiesInitialized = false;
     }
 
-    private void SnapToPlayer()
+    public void SnapToPlayer()
     {
         Vector3 playerPosition = transform.position;
 
