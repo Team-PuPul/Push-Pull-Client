@@ -26,6 +26,13 @@ public class ButtonCanvas : MonoBehaviour
     // 이 캔버스를 떠날 때 마지막으로 선택돼 있던 버튼 (돌아왔을 때 복원용)
     private GameObject lastSelectedButton;
 
+    // 초기 상태 세팅(Start)이 이미 끝났는지 여부.
+    // 비활성 상태로 씬에 배치된 캔버스는 Start가 씬 진입 시점이 아니라
+    // "처음 활성화되는 시점"에 뒤늦게 실행되는데, 그 시점은 곧 EnableCanvas() 직후다.
+    // 가드가 없으면 방금 연 캔버스를 Start의 DisableCanvas()가 그대로 닫아버리고,
+    // 페이드 트윈끼리 충돌해 배경만 남는 문제가 생긴다.
+    private bool initialized;
+
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -34,6 +41,8 @@ public class ButtonCanvas : MonoBehaviour
 
     protected virtual void Start()
     {
+        if (initialized) return;
+
         if (isMainCanva) EnableCanvas();
         else DisableCanvas();
     }
@@ -46,6 +55,8 @@ public class ButtonCanvas : MonoBehaviour
     // 캔버스를 활성화시키고 효과 및 선택 버튼을 설정
     public virtual void EnableCanvas()
     {
+        initialized = true;
+
         SelectButton();
         canvas.enabled = true;
         canvasGroup.alpha = 0f;
@@ -74,6 +85,8 @@ public class ButtonCanvas : MonoBehaviour
     // 캔버스를 비활성화 시키고 알파를 0으로 바꿈
     public virtual void DisableCanvas()
     {
+        initialized = true;
+
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
     }

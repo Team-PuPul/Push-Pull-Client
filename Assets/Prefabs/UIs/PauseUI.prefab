@@ -111,7 +111,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 699290046274346651}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -881,9 +881,9 @@ RectTransform:
   - {fileID: 26115639410502929}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -422.52}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5805718835390360015
@@ -1037,7 +1037,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5351983118992139776}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 0}
@@ -1101,7 +1101,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5351983118992139776}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -1471,9 +1471,9 @@ RectTransform:
   - {fileID: 6776536358364140068}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -540}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2060147778246900163
@@ -2051,9 +2051,9 @@ RectTransform:
   - {fileID: 2448632707389549626}
   m_Father: {fileID: 1265580225252411586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -657.48}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 479.73, y: 97.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8695495802962448809
@@ -2374,6 +2374,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2408001688785654111, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7295106
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420409081173626051, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7600456
+      objectReference: {fileID: 0}
     - target: {fileID: 2600933858610732652, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -2682,6 +2690,10 @@ PrefabInstance:
       propertyPath: disableCanvas
       value: 
       objectReference: {fileID: 7644687514492201522}
+    - target: {fileID: 7222075495612918222, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7295106
+      objectReference: {fileID: 0}
     - target: {fileID: 7265540851318266521, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: disableCanvas
       value: 
