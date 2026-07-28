@@ -111,7 +111,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 699290046274346651}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -1008,7 +1008,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &120640827132716968
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1037,7 +1037,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5351983118992139776}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 0}
@@ -1101,7 +1101,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5351983118992139776}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -2374,6 +2374,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2408001688785654111, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7295106
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420409081173626051, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7600456
+      objectReference: {fileID: 0}
     - target: {fileID: 2600933858610732652, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -2465,7 +2473,7 @@ PrefabInstance:
     - target: {fileID: 3657092427247366269, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 99310d5299369b742a6e5d394314c7b2, type: 3}
+      objectReference: {fileID: 21300000, guid: 6fd631fe9f75da747b08d3de55db3a25, type: 3}
     - target: {fileID: 3866615102424104224, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: disableCanvas
       value: 
@@ -2682,6 +2690,10 @@ PrefabInstance:
       propertyPath: disableCanvas
       value: 
       objectReference: {fileID: 7644687514492201522}
+    - target: {fileID: 7222075495612918222, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
+      propertyPath: m_Value
+      value: 0.7295106
+      objectReference: {fileID: 0}
     - target: {fileID: 7265540851318266521, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: disableCanvas
       value: 
@@ -2737,7 +2749,7 @@ PrefabInstance:
     - target: {fileID: 9075121227564745052, guid: cb89e4b8bb3d8e94e8ec632d47a5ece3, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 6eec3863d421d154598b8d56c22b2629, type: 3}
+      objectReference: {fileID: 21300000, guid: 768a0677dcf995840a2da885144e1859, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
