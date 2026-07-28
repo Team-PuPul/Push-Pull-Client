@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using Mirror;
 using UnityEngine;
 
@@ -16,15 +16,26 @@ public class MoveTile : NetworkBehaviour, IMovingSurface
     [SerializeField]
     private float waitTime;
 
-    private Vector3 desPos;
 
     public bool CanCarryPlayer => true;
     public Vector3 CarryPosition => transform.position;
 
+    private Vector3 startLocalPosition;
+    private Vector3 targetPos1;
+    private Vector3 targetPos2;
+    private Vector3 desPos;
+
+
     [ServerCallback]
     private void Start()
     {
-        desPos = pos1;
+        startLocalPosition = transform.localPosition;
+
+        targetPos1 = startLocalPosition + pos1;
+        targetPos2 = startLocalPosition + pos2;
+
+        desPos = targetPos1;
+
         StartCoroutine(Move());
     }
 
