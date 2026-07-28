@@ -107,7 +107,7 @@ public class PlayerGrabController : MonoBehaviour
         pressStartedAt = Time.time;
 
         if (player.GrabObject != null)
-            player.GrabObject.rotation = Quaternion.Euler(0f, 0f, 0f);
+            ApplyGrabRotation(0f);
     }
 
     private void EndGrabInput()
@@ -200,7 +200,18 @@ public class PlayerGrabController : MonoBehaviour
             targetAngle,
             Time.deltaTime * aimSmooth
         );
-        player.GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothAngle);
+        ApplyGrabRotation(smoothAngle);
+    }
+
+    public void ApplyRemoteGrabRotation(float localZAngle)
+    {
+        ApplyGrabRotation(localZAngle);
+    }
+
+    private void ApplyGrabRotation(float localZAngle)
+    {
+        if (player.GrabObject != null)
+            player.GrabObject.localRotation = Quaternion.Euler(0f, 0f, localZAngle);
     }
 
     public void ResetStageSpawnState()
@@ -212,6 +223,6 @@ public class PlayerGrabController : MonoBehaviour
         player.ChargeUI?.OffGrab();
 
         if (player.GrabObject != null)
-            player.GrabObject.localRotation = Quaternion.identity;
+            ApplyGrabRotation(0f);
     }
 }
