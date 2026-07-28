@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -64,7 +64,7 @@ public class Obstacle : MonoBehaviour
         levelLoader.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    //±âÁ¸ÄÚµå
+    //ê¸°ì¡´ì½”ë“œ
     //private void OnCollisionEnter2D(Collision2D collision)
     //{
     //    if (collision.gameObject.TryGetComponent<NewPlayer1>(out var player1))

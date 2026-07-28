@@ -1,4 +1,4 @@
-using Mirror;
+ï»¿using Mirror;
 using UnityEngine;
 
 public class Key : NetworkBehaviour
@@ -28,7 +28,7 @@ public class Key : NetworkBehaviour
         if (counter == null)
         {
             Debug.LogError(
-                $"[Key:{gameObject.name}] KeyCounter¸¦ Ã£À» ¼ö ¾ø¾î Å° È¹µæÀ» Ã³¸®ÇÒ ¼ö ¾ø½À´Ï´Ù. "
+                $"[Key:{gameObject.name}] KeyCounterë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ í‚¤ íšë“ì„ ì²˜ë¦¬í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. "
                     + $"isServer={isServer}, isClient={isClient}, netId={netId}"
             );
             return;

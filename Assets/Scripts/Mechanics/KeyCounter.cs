@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using Mirror;
 using UnityEngine;
 
@@ -18,7 +18,7 @@ public class KeyCounter : NetworkBehaviour
     public int KeyCount => keyCount;
     public int MaxCount => maxCount;
 
-    // ±âÁ¸ ÄÚµå È£È¯¿ë. Door/UI¿¡¼­ _maxCount¸¦ ¾²°í ÀÖ¾ú´Ù¸é ´çÀå ¾È ÅÍÁö°Ô µÒ.
+    // ê¸°ì¡´ ì½”ë“œ í˜¸í™˜ìš©. Door/UIì—ì„œ _maxCountë¥¼ ì“°ê³  ìžˆì—ˆë‹¤ë©´ ë‹¹ìž¥ ì•ˆ í„°ì§€ê²Œ ë‘ .
     public int _maxCount => maxCount;
 
     public override void OnStartServer()

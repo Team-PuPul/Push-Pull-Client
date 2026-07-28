@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -157,13 +157,13 @@ public class Monster : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        // ÀÌµ¿ Á¤Áö
+        // ì´ë™ ì •ì§€
         if (moveCoroutine != null)
             StopCoroutine(moveCoroutine);
 
         rigid.velocity = Vector2.zero;
 
-        // Z È¸Àü Lock ÇØÁ¦
+        // Z íšŒì „ Lock í•´ì œ
         rigid.constraints &= ~RigidbodyConstraints2D.FreezeRotation;
 
     }
