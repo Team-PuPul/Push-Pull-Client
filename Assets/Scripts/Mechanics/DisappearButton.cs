@@ -1,45 +1,55 @@
 using Mirror;
 using UnityEngine;
 
-// 버튼을 밟으면 연결된 벽을 사라지게 하는 기믹.
-// 멀티플레이 동기화를 위해 NetworkBehaviour로 전환했다.
-// 트리거는 서버에서만 감지하고, 결과 상태를 SyncVar로 모든 클라이언트에 전파한다.
 public class DisappearButton : NetworkBehaviour
 {
-    [SerializeField] GameObject disappearObj;
+    private const string PressedAnimationState = "Push";
 
-    // 버튼을 누를 수 있는 오브젝트의 레이어(플레이어 + 미는 박스 등).
-    // 비워 두면(Nothing) Rigidbody2D를 가진 모든 오브젝트를 허용한다.
-    [SerializeField] LayerMask pressableMask;
+    [SerializeField]
+    private GameObject disappearObj;
 
-    Animator anim;
+    [SerializeField]
+    private LayerMask pressableMask;
 
-    // 버튼 눌림 상태. 한 번 눌리면 벽이 영구히 사라진다.
-    [SyncVar(hook = nameof(OnPressedChanged))]
-    bool isPressed;
+    private Animator anim;
+    private NetworkAnimator networkAnimator;
+    private Renderer[] wallRenderers;
+    private Collider2D[] wallColliders;
+    private bool[] initialRendererEnabledStates;
+    private bool[] initialColliderEnabledStates;
 
-    // 벽 활성 상태. 서버가 권한을 갖고 모든 클라이언트에 동기화한다.
-    [SyncVar(hook = nameof(OnWallActiveChanged))]
-    bool isWallActive = true;
-
-    void Awake()
+    private void Awake()
     {
         anim = GetComponent<Animator>();
+        networkAnimator = GetComponent<NetworkAnimator>();
+        CacheWallComponents();
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        ApplyWallActive(isWallActive);
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
 
-        // 나중에 접속한 게스트도 현재 상태를 그대로 반영받는다.
         ApplyWallActive(isWallActive);
 
-        if (isPressed && anim != null)
-            anim.Play("Push");
+        if (isPressed)
+            PlayPressedAnimationLocal();
     }
 
+    [SyncVar(hook = nameof(OnPressedChanged))]
+    private bool isPressed;
+
+    [SyncVar(hook = nameof(OnWallActiveChanged))]
+    private bool isWallActive = true;
+
     [ServerCallback]
-    void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (isPressed)
             return;
@@ -47,39 +57,94 @@ public class DisappearButton : NetworkBehaviour
         if (!IsPressable(collision))
             return;
 
-        // SyncVar만 변경하면 호스트를 포함한 모든 클라이언트에서 hook이 호출되어
-        // 벽 비활성화·애니메이션이 반영된다. (수동 호출은 호스트에서 중복 실행을 유발한다.)
         isPressed = true;
         isWallActive = false;
+
+        ApplyWallActive(isWallActive);
+        PlayPressedAnimation();
     }
 
-    // 트리거 대상이 버튼을 누를 수 있는 오브젝트인지 판별한다.
-    bool IsPressable(Collider2D collision)
+    private bool IsPressable(Collider2D collision)
     {
         if (collision.attachedRigidbody == null)
             return false;
 
-        // 레이어 마스크가 지정되지 않았으면 물리 오브젝트를 모두 허용한다.
         if (pressableMask.value == 0)
             return true;
 
         return (pressableMask.value & (1 << collision.gameObject.layer)) != 0;
     }
 
-    void OnPressedChanged(bool oldValue, bool newValue)
+    private void OnPressedChanged(bool oldValue, bool newValue)
     {
-        if (newValue && anim != null)
-            anim.Play("Push");
+        if (!newValue)
+            return;
+
+        if (isServer)
+            return;
+
+        if (networkAnimator == null)
+            PlayPressedAnimationLocal();
     }
 
-    void OnWallActiveChanged(bool oldValue, bool newValue)
+    private void OnWallActiveChanged(bool oldValue, bool newValue)
     {
         ApplyWallActive(newValue);
     }
 
-    void ApplyWallActive(bool active)
+    private void ApplyWallActive(bool active)
     {
-        if (disappearObj != null)
-            disappearObj.SetActive(active);
+        CacheWallComponents();
+
+        if (disappearObj == null)
+            return;
+
+        if (!disappearObj.activeSelf)
+            disappearObj.SetActive(true);
+
+        for (int i = 0; i < wallRenderers.Length; i++)
+        {
+            if (wallRenderers[i] == null)
+                continue;
+
+            wallRenderers[i].enabled = active && initialRendererEnabledStates[i];
+        }
+
+        for (int i = 0; i < wallColliders.Length; i++)
+        {
+            if (wallColliders[i] == null)
+                continue;
+
+            wallColliders[i].enabled = active && initialColliderEnabledStates[i];
+        }
+    }
+
+    private void CacheWallComponents()
+    {
+        if (disappearObj == null || wallRenderers != null || wallColliders != null)
+            return;
+
+        wallRenderers = disappearObj.GetComponentsInChildren<Renderer>(true);
+        wallColliders = disappearObj.GetComponentsInChildren<Collider2D>(true);
+
+        initialRendererEnabledStates = new bool[wallRenderers.Length];
+        initialColliderEnabledStates = new bool[wallColliders.Length];
+
+        for (int i = 0; i < wallRenderers.Length; i++)
+            initialRendererEnabledStates[i] = wallRenderers[i] != null && wallRenderers[i].enabled;
+
+        for (int i = 0; i < wallColliders.Length; i++)
+            initialColliderEnabledStates[i] = wallColliders[i] != null && wallColliders[i].enabled;
+    }
+
+    private void PlayPressedAnimation()
+    {
+        PlayPressedAnimationLocal();
+    }
+
+    private void PlayPressedAnimationLocal()
+    {
+        if (anim != null)
+            anim.Play(PressedAnimationState, 0, 0f);
     }
 }
