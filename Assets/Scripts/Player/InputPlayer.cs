@@ -42,6 +42,7 @@ public class InputPlayer : NetworkBehaviour
     private bool lastIsJumping;
     private bool lastIsFalling;
     private bool clearedStarted;
+    private Coroutine fadeOutClearVisualsCoroutine;
 
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
     private static readonly int IsJumpingHash = Animator.StringToHash("IsJumping");
@@ -239,6 +240,74 @@ public class InputPlayer : NetworkBehaviour
         jumpAble = false;
         hasStartedFalling = false;
         ResetVerticalAnimationTracker();
+    }
+
+    [Server]
+    public void ServerApplyStageSpawnState(Vector3 position, Quaternion rotation)
+    {
+        NetworkTransformBase networkTransform = GetComponent<NetworkTransformBase>();
+
+        if (networkTransform != null)
+            networkTransform.ServerTeleport(position, rotation);
+        else
+            transform.SetPositionAndRotation(position, rotation);
+
+        syncIsMoving = false;
+        syncIsJumping = false;
+        syncIsFalling = false;
+        syncIsDead = false;
+        syncAnimName = "";
+
+        ApplyStageSpawnState(position, rotation);
+        RpcApplyStageSpawnState(position, rotation);
+    }
+
+    [ClientRpc]
+    private void RpcApplyStageSpawnState(Vector3 position, Quaternion rotation)
+    {
+        ApplyStageSpawnState(position, rotation);
+    }
+
+    private void ApplyStageSpawnState(Vector3 position, Quaternion rotation)
+    {
+        transform.SetPositionAndRotation(position, rotation);
+
+        if (rb == null)
+            rb = GetComponent<Rigidbody2D>();
+
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            rb.position = position;
+            rb.SetRotation(rotation.eulerAngles.z);
+        }
+
+        if (fadeOutClearVisualsCoroutine != null)
+        {
+            StopCoroutine(fadeOutClearVisualsCoroutine);
+            fadeOutClearVisualsCoroutine = null;
+        }
+
+        cantMove = false;
+        clearedStarted = false;
+        isGrounded = true;
+        ignoreGroundUntilTime = 0f;
+        hasStartedFalling = false;
+        lastAnimName = "";
+        jumpAble = true;
+
+        ResetVerticalAnimationTracker();
+        RestorePlayerVisualAlpha();
+
+        lastIsMoving = false;
+        lastIsJumping = false;
+        lastIsFalling = false;
+        ApplyLocomotionAnimatorState(false, false, false);
+        SetAnimatorBool(IsDeadHash, false);
+        SetAnimatorBool(IsClearedHash, false);
+
+        Physics2D.SyncTransforms();
     }
 
     private Vector2 GetMoveInput()
@@ -683,7 +752,39 @@ public class InputPlayer : NetworkBehaviour
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
         if (sprites.Length > 0 || texts.Length > 0)
-            StartCoroutine(FadeOutClearVisuals(sprites, texts, 0.5f));
+            fadeOutClearVisualsCoroutine = StartCoroutine(
+                FadeOutClearVisuals(sprites, texts, 0.5f)
+            );
+    }
+
+    private void RestorePlayerVisualAlpha()
+    {
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            SpriteRenderer sprite = sprites[i];
+
+            if (sprite == null)
+                continue;
+
+            Color color = sprite.color;
+            color.a = 1f;
+            sprite.color = color;
+        }
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            TMP_Text text = texts[i];
+
+            if (text == null)
+                continue;
+
+            Color color = text.color;
+            color.a = 1f;
+            text.color = color;
+        }
     }
 
     private IEnumerator FadeOutClearVisuals(
@@ -764,5 +865,7 @@ public class InputPlayer : NetworkBehaviour
             finalColor.a = 0f;
             text.color = finalColor;
         }
+
+        fadeOutClearVisualsCoroutine = null;
     }
 }
