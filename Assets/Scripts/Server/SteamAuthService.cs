@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Text;
 using Steamworks;
 using UnityEngine;
@@ -37,7 +37,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
         if (!SteamManager.Initialized)
         {
-            Debug.LogError("[SteamAuth] Steam ÃÊ±âÈ­¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
+            Debug.LogError("[SteamAuth] Steam ì´ˆê¸°í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
             Login();
             yield break;
         }
@@ -47,7 +47,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
         if (apiConnector == null)
         {
-            Debug.LogError("[SteamAuth] APIConnector¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("[SteamAuth] APIConnectorë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             yield break;
         }
 
@@ -72,7 +72,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
         if (!SteamManager.Initialized)
         {
-            Fail("SteamÀÌ ÃÊ±âÈ­µÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Fail("Steamì´ ì´ˆê¸°í™”ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -82,7 +82,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
             if (apiConnector == null)
             {
-                Fail("APIConnector¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+                Fail("APIConnectorë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
                 return;
             }
         }
@@ -94,18 +94,18 @@ public sealed class SteamAuthService : MonoBehaviour
         PlayerPrefs.DeleteKey(SessionIdKey);
         PlayerPrefs.Save();
 
-        Debug.Log($"[SteamAuth] ·Î±×ÀÎ ½Ãµµ {loginAttemptCount}/{MaxLoginAttempts}");
+        Debug.Log($"[SteamAuth] ë¡œê·¸ì¸ ì‹œë„ {loginAttemptCount}/{MaxLoginAttempts}");
 
-        // HTTP ¹é¿£µåÀÇ AuthenticateUserTicket °ËÁõ¿ë Æ¼ÄÏ
+        // HTTP ë°±ì—”ë“œì˜ AuthenticateUserTicket ê²€ì¦ìš© í‹°ì¼“
         authTicket = SteamUser.GetAuthTicketForWebApi(string.Empty);
 
         if (authTicket == HAuthTicket.Invalid)
         {
-            Fail("Steam ÀÎÁõ Æ¼ÄÏ ¿äÃ»¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
+            Fail("Steam ì¸ì¦ í‹°ì¼“ ìš”ì²­ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
             return;
         }
 
-        Debug.Log("[SteamAuth] Steam ÀÎÁõ Æ¼ÄÏ ¿äÃ» ¿Ï·á");
+        Debug.Log("[SteamAuth] Steam ì¸ì¦ í‹°ì¼“ ìš”ì²­ ì™„ë£Œ");
     }
 
     private void EnsureTicketCallback()
@@ -126,7 +126,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
         if (callback.m_eResult != EResult.k_EResultOK)
         {
-            Fail($"Steam Æ¼ÄÏ ¹ß±Ş ½ÇÆĞ: {callback.m_eResult}");
+            Fail($"Steam í‹°ì¼“ ë°œê¸‰ ì‹¤íŒ¨: {callback.m_eResult}");
             return;
         }
 
@@ -136,7 +136,7 @@ public sealed class SteamAuthService : MonoBehaviour
             || callback.m_cubTicket > callback.m_rgubTicket.Length
         )
         {
-            Fail("Steam¿¡¼­ ºó ÀÎÁõ Æ¼ÄÏÀ» ¹İÈ¯Çß½À´Ï´Ù.");
+            Fail("Steamì—ì„œ ë¹ˆ ì¸ì¦ í‹°ì¼“ì„ ë°˜í™˜í–ˆìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -171,7 +171,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            Fail("¼­¹ö°¡ sessionId¸¦ ¹İÈ¯ÇÏÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Fail("ì„œë²„ê°€ sessionIdë¥¼ ë°˜í™˜í•˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -182,7 +182,7 @@ public sealed class SteamAuthService : MonoBehaviour
         loginAttemptCount = 0;
         CancelTicket();
 
-        Debug.Log("[SteamAuth] ·Î±×ÀÎ ¼º°ø");
+        Debug.Log("[SteamAuth] ë¡œê·¸ì¸ ì„±ê³µ");
     }
 
     private void Fail(string error)
@@ -197,9 +197,9 @@ public sealed class SteamAuthService : MonoBehaviour
         if (IsTooManyRequests(error))
         {
             Debug.LogError(
-                $"[SteamAuth] ·Î±×ÀÎ ½ÇÆĞ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+                $"[SteamAuth] ë¡œê·¸ì¸ ì‹¤íŒ¨ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
             );
-            Debug.LogError("[SteamAuth] ¿äÃ» Á¦ÇÑ(429)À¸·Î °ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.");
+            Debug.LogError("[SteamAuth] ìš”ì²­ ì œí•œ(429)ìœ¼ë¡œ ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.");
             QuitGame();
             return;
         }
@@ -207,8 +207,8 @@ public sealed class SteamAuthService : MonoBehaviour
         if (loginAttemptCount < MaxLoginAttempts)
         {
             Debug.LogWarning(
-                $"[SteamAuth] ·Î±×ÀÎ ½ÇÆĞ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
-                    + $" {LoginRetryDelay}ÃÊ ÈÄ Àç½ÃµµÇÕ´Ï´Ù."
+                $"[SteamAuth] ë¡œê·¸ì¸ ì‹¤íŒ¨ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+                    + $" {LoginRetryDelay}ì´ˆ í›„ ì¬ì‹œë„í•©ë‹ˆë‹¤."
             );
 
             if (isActiveAndEnabled)
@@ -218,9 +218,9 @@ public sealed class SteamAuthService : MonoBehaviour
         }
 
         Debug.LogError(
-            $"[SteamAuth] ·Î±×ÀÎ ½ÇÆĞ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
+            $"[SteamAuth] ë¡œê·¸ì¸ ì‹¤íŒ¨ ({loginAttemptCount}/{MaxLoginAttempts}): {error}"
         );
-        Debug.LogError("[SteamAuth] ·Î±×ÀÎ Àç½Ãµµ ÇÑµµ¸¦ ÃÊ°úÇØ °ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.");
+        Debug.LogError("[SteamAuth] ë¡œê·¸ì¸ ì¬ì‹œë„ í•œë„ë¥¼ ì´ˆê³¼í•´ ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.");
         QuitGame();
     }
 
@@ -241,7 +241,7 @@ public sealed class SteamAuthService : MonoBehaviour
     private static void QuitGame()
     {
 #if UNITY_EDITOR
-        Debug.LogWarning("[SteamAuth] ¿¡µğÅÍ¿¡¼­´Â ÀÚµ¿ Á¾·á¸¦ °Ç³Ê¶İ´Ï´Ù.");
+        Debug.LogWarning("[SteamAuth] ì—ë””í„°ì—ì„œëŠ” ìë™ ì¢…ë£Œë¥¼ ê±´ë„ˆëœë‹ˆë‹¤.");
 #else
         Application.Quit();
 #endif
@@ -249,7 +249,7 @@ public sealed class SteamAuthService : MonoBehaviour
 
     private void CancelTicket()
     {
-        // Æ¼ÄÏÀÌ ¾ø´Ù¸é SteamManager.Initialized¿¡ Á¢±ÙÇÏÁö ¾Ê´Â´Ù.
+        // í‹°ì¼“ì´ ì—†ë‹¤ë©´ SteamManager.Initializedì— ì ‘ê·¼í•˜ì§€ ì•ŠëŠ”ë‹¤.
         if (authTicket == HAuthTicket.Invalid)
             return;
 
@@ -275,8 +275,8 @@ public sealed class SteamAuthService : MonoBehaviour
 
     private void OnDisable()
     {
-        // SteamManagerÀÇ ¾È³»´ë·Î OnDestroy¿¡¼­´Â
-        // Steamworks API¸¦ È£ÃâÇÏÁö ¾Ê´Â´Ù.
+        // SteamManagerì˜ ì•ˆë‚´ëŒ€ë¡œ OnDestroyì—ì„œëŠ”
+        // Steamworks APIë¥¼ í˜¸ì¶œí•˜ì§€ ì•ŠëŠ”ë‹¤.
         if (retryLoginCoroutine != null)
         {
             StopCoroutine(retryLoginCoroutine);

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.IO;
 using Mirror;
 using UnityEngine;
@@ -44,7 +44,7 @@ public class LevelLoader : MonoBehaviour
 
         if (string.IsNullOrEmpty(sceneName))
         {
-            Debug.LogError($"BuildIndex {levelIndex}¿¡ ÇØ´çÇÏ´Â ¾ÀÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError($"BuildIndex {levelIndex}ì— í•´ë‹¹í•˜ëŠ” ì”¬ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             yield break;
         }
 
@@ -73,7 +73,7 @@ public class LevelLoader : MonoBehaviour
         if (NetworkClient.active)
         {
             Debug.LogWarning(
-                $"Å¬¶óÀÌ¾ğÆ®¿¡¼­´Â Á÷Á¢ ¾ÀÀ» º¯°æÇÏÁö ¾Ê½À´Ï´Ù. sceneName={sceneName}"
+                $"í´ë¼ì´ì–¸íŠ¸ì—ì„œëŠ” ì§ì ‘ ì”¬ì„ ë³€ê²½í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. sceneName={sceneName}"
             );
             return;
         }

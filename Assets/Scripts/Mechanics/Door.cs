@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
@@ -50,7 +50,7 @@ public class Door : NetworkBehaviour
         else
         {
             Debug.LogError(
-                $"{NetworkLogContext} KeyCounter¸¦ Ã£À» ¼ö ¾ø¾î Å° º¯°æ ÀÌº¥Æ®¸¦ ±¸µ¶ÇÒ ¼ö ¾ø½À´Ï´Ù."
+                $"{NetworkLogContext} KeyCounterë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ í‚¤ ë³€ê²½ ì´ë²¤íŠ¸ë¥¼ êµ¬ë…í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
             );
         }
     }
@@ -94,7 +94,7 @@ public class Door : NetworkBehaviour
         if (keyCounter == null)
         {
             Debug.LogError(
-                $"{NetworkLogContext} KeyCounter¸¦ Ã£À» ¼ö ¾ø¾î Å¬¸®¾î ÆÇÁ¤À» ÁøÇàÇÒ ¼ö ¾ø½À´Ï´Ù."
+                $"{NetworkLogContext} KeyCounterë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ í´ë¦¬ì–´ íŒì •ì„ ì§„í–‰í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
             );
             return;
         }
@@ -114,7 +114,7 @@ public class Door : NetworkBehaviour
         if (playerIdentity == null)
         {
             Debug.LogWarning(
-                $"{NetworkLogContext} ¹® Æ®¸®°Å¿¡ NetworkIdentity ¾ø´Â ¿ÀºêÁ§Æ®°¡ µé¾î¿Ô½À´Ï´Ù. "
+                $"{NetworkLogContext} ë¬¸ íŠ¸ë¦¬ê±°ì— NetworkIdentity ì—†ëŠ” ì˜¤ë¸Œì íŠ¸ê°€ ë“¤ì–´ì™”ìŠµë‹ˆë‹¤. "
                     + $"object={collision.gameObject.name}"
             );
             return false;
@@ -123,7 +123,7 @@ public class Door : NetworkBehaviour
         if (playerIdentity.connectionToClient == null)
         {
             Debug.LogWarning(
-                $"{NetworkLogContext} ¹® Æ®¸®°Å¿¡ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ñ ³×Æ®¿öÅ© ¿ÀºêÁ§Æ®°¡ µé¾î¿Ô½À´Ï´Ù. "
+                $"{NetworkLogContext} ë¬¸ íŠ¸ë¦¬ê±°ì— í”Œë ˆì´ì–´ê°€ ì•„ë‹Œ ë„¤íŠ¸ì›Œí¬ ì˜¤ë¸Œì íŠ¸ê°€ ë“¤ì–´ì™”ìŠµë‹ˆë‹¤. "
                     + $"object={collision.gameObject.name}, targetNetId={playerIdentity.netId}"
             );
             return false;

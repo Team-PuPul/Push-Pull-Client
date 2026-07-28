@@ -1,4 +1,4 @@
-using Mirror;
+ï»¿using Mirror;
 using UnityEngine;
 
 public sealed class WaitingRoomUIController : MonoBehaviour
@@ -25,17 +25,17 @@ public sealed class WaitingRoomUIController : MonoBehaviour
     {
         if (gameStartButton == null)
         {
-            Debug.LogWarning("[WaitingRoomUI] GameStartButtonÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning("[WaitingRoomUI] GameStartButtonì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
 
             return;
         }
 
-        // È£½ºÆ®´Â NetworkServer°¡ È°¼ºÈ­µÇ¾î ÀÖ°í,
-        // °Ô½ºÆ® Å¬¶óÀÌ¾ğÆ®´Â NetworkServer°¡ ºñÈ°¼ºÈ­µÇ¾î ÀÖ´Ù.
+        // í˜¸ìŠ¤íŠ¸ëŠ” NetworkServerê°€ í™œì„±í™”ë˜ì–´ ìˆê³ ,
+        // ê²ŒìŠ¤íŠ¸ í´ë¼ì´ì–¸íŠ¸ëŠ” NetworkServerê°€ ë¹„í™œì„±í™”ë˜ì–´ ìˆë‹¤.
         bool isHost = NetworkServer.active;
 
         gameStartButton.SetActive(isHost);
 
-        Debug.Log($"[WaitingRoomUI] GameStartButton Ç¥½Ã »óÅÂ: {isHost}");
+        Debug.Log($"[WaitingRoomUI] GameStartButton í‘œì‹œ ìƒíƒœ: {isHost}");
     }
 }
