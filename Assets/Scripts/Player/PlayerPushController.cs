@@ -47,6 +47,12 @@ public class PlayerPushController : MonoBehaviour
         if (!player.isLocalPlayer)
             return;
 
+        if (!player.CanProcessGameplay)
+        {
+            ResetStageSpawnState();
+            return;
+        }
+
         if (context.started)
         {
             PushHeld = true;
@@ -80,5 +86,17 @@ public class PlayerPushController : MonoBehaviour
 
         charge = 0f;
         return false;
+    }
+
+    public void ResetStageSpawnState()
+    {
+        isCharging = false;
+        PushHeld = false;
+        IsPushing = false;
+        PushCharge = 0f;
+        player.ChargeUI?.OffPush();
+
+        if (player.PushGlove != null)
+            player.PushGlove.PushPower = 0f;
     }
 }

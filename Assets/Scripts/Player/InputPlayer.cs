@@ -11,6 +11,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerGrabController))]
 public class InputPlayer : NetworkBehaviour
 {
+    private const int StageSpawnOwnerTeleportAttempts = 4;
+    private const float StageSpawnOwnerTeleportInterval = 0.05f;
+
     [SerializeField]
     private ExChargeUi UI;
 
@@ -42,7 +45,13 @@ public class InputPlayer : NetworkBehaviour
     private bool lastIsJumping;
     private bool lastIsFalling;
     private bool clearedStarted;
+    private bool stageSpawnLocked;
+    private int stageSpawnSequence;
+    private int latestAppliedStageSpawnSequence;
     private Coroutine fadeOutClearVisualsCoroutine;
+    private Coroutine stageSpawnCorrectionCoroutine;
+    private Vector3 pendingStageSpawnPosition;
+    private Quaternion pendingStageSpawnRotation = Quaternion.identity;
 
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
     private static readonly int IsJumpingHash = Animator.StringToHash("IsJumping");
@@ -73,7 +82,8 @@ public class InputPlayer : NetworkBehaviour
     public PlayerGrabController GrabController { get; private set; }
 
     internal ExChargeUi ChargeUI => UI;
-    internal bool CanProcessGameplay => isLocalPlayer && Time.timeScale != 0f && !cantMove;
+    internal bool CanProcessGameplay =>
+        isLocalPlayer && Time.timeScale != 0f && !cantMove && !stageSpawnLocked;
 
     // 기존 외부 코드가 InputPlayer를 통해 상태를 읽고 쓰는 API는 그대로 유지한다.
     public bool jumpAble
@@ -189,6 +199,17 @@ public class InputPlayer : NetworkBehaviour
         ResetVerticalAnimationTracker();
     }
 
+    private void OnDisable()
+    {
+        if (stageSpawnCorrectionCoroutine != null)
+        {
+            StopCoroutine(stageSpawnCorrectionCoroutine);
+            stageSpawnCorrectionCoroutine = null;
+        }
+
+        stageSpawnLocked = false;
+    }
+
     private void Update()
     {
         if (CanProcessGameplay)
@@ -245,12 +266,9 @@ public class InputPlayer : NetworkBehaviour
     [Server]
     public void ServerApplyStageSpawnState(Vector3 position, Quaternion rotation)
     {
-        NetworkTransformBase networkTransform = GetComponent<NetworkTransformBase>();
-
-        if (networkTransform != null)
-            networkTransform.ServerTeleport(position, rotation);
-        else
-            transform.SetPositionAndRotation(position, rotation);
+        int sequence = ++stageSpawnSequence;
+        pendingStageSpawnPosition = position;
+        pendingStageSpawnRotation = rotation;
 
         syncIsMoving = false;
         syncIsJumping = false;
@@ -258,14 +276,119 @@ public class InputPlayer : NetworkBehaviour
         syncIsDead = false;
         syncAnimName = "";
 
+        ApplyServerStageSpawnTransform(position, rotation);
         ApplyStageSpawnState(position, rotation);
-        RpcApplyStageSpawnState(position, rotation);
+
+        RpcApplyStageSpawnState(sequence, position, rotation);
+
+        if (connectionToClient != null)
+            TargetApplyOwnerStageSpawnState(connectionToClient, sequence, position, rotation);
     }
 
     [ClientRpc]
-    private void RpcApplyStageSpawnState(Vector3 position, Quaternion rotation)
+    private void RpcApplyStageSpawnState(int sequence, Vector3 position, Quaternion rotation)
     {
+        if (isLocalPlayer || sequence < latestAppliedStageSpawnSequence)
+            return;
+
+        latestAppliedStageSpawnSequence = sequence;
         ApplyStageSpawnState(position, rotation);
+    }
+
+    [TargetRpc]
+    private void TargetApplyOwnerStageSpawnState(
+        NetworkConnectionToClient target,
+        int sequence,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        if (!isLocalPlayer || sequence < latestAppliedStageSpawnSequence)
+            return;
+
+        latestAppliedStageSpawnSequence = sequence;
+        stageSpawnLocked = true;
+
+        ApplyStageSpawnState(position, rotation);
+        StartOwnerStageSpawnCorrection(sequence, position, rotation);
+    }
+
+    private void StartOwnerStageSpawnCorrection(
+        int sequence,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        if (stageSpawnCorrectionCoroutine != null)
+            StopCoroutine(stageSpawnCorrectionCoroutine);
+
+        stageSpawnCorrectionCoroutine = StartCoroutine(
+            OwnerStageSpawnCorrectionRoutine(sequence, position, rotation)
+        );
+    }
+
+    private IEnumerator OwnerStageSpawnCorrectionRoutine(
+        int sequence,
+        Vector3 position,
+        Quaternion rotation
+    )
+    {
+        for (int i = 0; i < StageSpawnOwnerTeleportAttempts; i++)
+        {
+            if (sequence != latestAppliedStageSpawnSequence)
+            {
+                stageSpawnCorrectionCoroutine = null;
+                yield break;
+            }
+
+            ApplyStageSpawnState(position, rotation);
+            SendOwnerStageSpawnTeleport(position, rotation);
+
+            if (i < StageSpawnOwnerTeleportAttempts - 1)
+                yield return new WaitForSecondsRealtime(StageSpawnOwnerTeleportInterval);
+        }
+
+        if (sequence == latestAppliedStageSpawnSequence)
+        {
+            CmdConfirmStageSpawnState(sequence);
+            stageSpawnLocked = false;
+        }
+
+        stageSpawnCorrectionCoroutine = null;
+    }
+
+    private void SendOwnerStageSpawnTeleport(Vector3 position, Quaternion rotation)
+    {
+        if (!isLocalPlayer || !NetworkClient.active || !NetworkClient.ready)
+            return;
+
+        NetworkTransformBase networkTransform = GetComponent<NetworkTransformBase>();
+
+        if (networkTransform == null || networkTransform.syncDirection != SyncDirection.ClientToServer)
+            return;
+
+        networkTransform.CmdTeleport(position, rotation);
+    }
+
+    [Command]
+    private void CmdConfirmStageSpawnState(int sequence)
+    {
+        if (sequence != stageSpawnSequence)
+            return;
+
+        ApplyServerStageSpawnTransform(pendingStageSpawnPosition, pendingStageSpawnRotation);
+        ApplyStageSpawnState(pendingStageSpawnPosition, pendingStageSpawnRotation);
+    }
+
+    [Server]
+    private void ApplyServerStageSpawnTransform(Vector3 position, Quaternion rotation)
+    {
+        NetworkTransformBase networkTransform = GetComponent<NetworkTransformBase>();
+
+        if (networkTransform != null)
+            networkTransform.ServerTeleport(position, rotation);
+        else
+            transform.SetPositionAndRotation(position, rotation);
     }
 
     private void ApplyStageSpawnState(Vector3 position, Quaternion rotation)
@@ -297,6 +420,7 @@ public class InputPlayer : NetworkBehaviour
         lastAnimName = "";
         jumpAble = true;
 
+        ResetStageSpawnGameplayState();
         ResetVerticalAnimationTracker();
         RestorePlayerVisualAlpha();
 
@@ -308,6 +432,16 @@ public class InputPlayer : NetworkBehaviour
         SetAnimatorBool(IsClearedHash, false);
 
         Physics2D.SyncTransforms();
+    }
+
+    private void ResetStageSpawnGameplayState()
+    {
+        Movement?.ResetStageSpawnState();
+        PushController?.ResetStageSpawnState();
+        GrabController?.ResetStageSpawnState();
+        GrabGlove?.ResetStageSpawnState();
+        PushGlove?.ResetStageSpawnState();
+        GetComponent<PlayerVisualInterpolator>()?.SnapToPlayer();
     }
 
     private Vector2 GetMoveInput()

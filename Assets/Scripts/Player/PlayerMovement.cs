@@ -75,6 +75,14 @@ public class PlayerMovement : MonoBehaviour
         if (!player.isLocalPlayer)
             return;
 
+        if (!player.CanProcessGameplay)
+        {
+            if (context.canceled)
+                ResetMoveInputState();
+
+            return;
+        }
+
         if (context.started || context.performed)
             moveLeft = true;
         else if (context.canceled)
@@ -88,6 +96,14 @@ public class PlayerMovement : MonoBehaviour
         if (!player.isLocalPlayer)
             return;
 
+        if (!player.CanProcessGameplay)
+        {
+            if (context.canceled)
+                ResetMoveInputState();
+
+            return;
+        }
+
         if (context.started || context.performed)
             moveRight = true;
         else if (context.canceled)
@@ -98,7 +114,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void HandleJump(InputAction.CallbackContext context)
     {
-        if (!player.isLocalPlayer || !context.performed || !jumpAble)
+        if (!player.isLocalPlayer || !player.CanProcessGameplay || !context.performed || !jumpAble)
             return;
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
@@ -212,6 +228,21 @@ public class PlayerMovement : MonoBehaviour
     {
         movingSurface = collision.collider.GetComponentInParent<IMovingSurface>();
         return movingSurface != null && movingSurface.CanCarryPlayer;
+    }
+
+    public void ResetStageSpawnState()
+    {
+        ResetMoveInputState();
+        jumpAble = true;
+        currentMovingSurface = null;
+        lastMovingSurfacePosition = Vector3.zero;
+    }
+
+    private void ResetMoveInputState()
+    {
+        moveLeft = false;
+        moveRight = false;
+        moveInput = Vector2.zero;
     }
 
     private bool IsGroundContact(Collision2D collision)
