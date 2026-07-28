@@ -19,9 +19,20 @@ public class PlayerGrabController : MonoBehaviour
     [SerializeField]
     private float oscillationDelay = 0.5f;
 
+    [SerializeField]
+    [Min(0f)]
+    private float rotationSyncInterval = 0.05f;
+
+    [SerializeField]
+    [Min(0f)]
+    private float rotationSyncAngleThreshold = 0.5f;
+
     private InputPlayer player;
     private float pressStartedAt;
+    private float nextRotationSyncTime;
+    private float lastSyncedRotationAngle;
     private bool isGrabHolding;
+    private bool hasSyncedRotationAngle;
     private Vector2 grabControlInput;
 
     public bool GrabHeld { get; private set; }
@@ -107,7 +118,10 @@ public class PlayerGrabController : MonoBehaviour
         pressStartedAt = Time.time;
 
         if (player.GrabObject != null)
-            player.GrabObject.rotation = Quaternion.Euler(0f, 0f, 0f);
+        {
+            ApplyGrabRotation(0f);
+            SyncGrabRotation(0f, true);
+        }
     }
 
     private void EndGrabInput()
@@ -117,6 +131,7 @@ public class PlayerGrabController : MonoBehaviour
 
         GrabHeld = false;
         isGrabHolding = false;
+        SyncGrabRotation(GetGrabRotationAngle(), true);
         player.GrabGlove?.DOGrab();
         player.PlayPlayerSound("PlayerPull_1", global::PlayerSounds.Pull);
         grabControlInput = Vector2.zero;
@@ -200,7 +215,52 @@ public class PlayerGrabController : MonoBehaviour
             targetAngle,
             Time.deltaTime * aimSmooth
         );
-        player.GrabObject.localRotation = Quaternion.Euler(0f, 0f, smoothAngle);
+        ApplyGrabRotation(smoothAngle);
+        SyncGrabRotation(smoothAngle, false);
+    }
+
+    public void ApplyRemoteGrabRotation(float localZAngle)
+    {
+        ApplyGrabRotation(localZAngle);
+    }
+
+    private void ApplyGrabRotation(float localZAngle)
+    {
+        if (player.GrabObject != null)
+            player.GrabObject.localRotation = Quaternion.Euler(0f, 0f, localZAngle);
+    }
+
+    private float GetGrabRotationAngle()
+    {
+        return player.GrabObject != null ? player.GrabObject.localEulerAngles.z : 0f;
+    }
+
+    private void SyncGrabRotation(float localZAngle, bool force)
+    {
+        if (!player.isLocalPlayer)
+            return;
+
+        float normalizedAngle = NormalizeAngle(localZAngle);
+        float angleDelta = Mathf.Abs(
+            Mathf.DeltaAngle(lastSyncedRotationAngle, normalizedAngle)
+        );
+
+        if (
+            !force
+            && hasSyncedRotationAngle
+            && (Time.time < nextRotationSyncTime || angleDelta < rotationSyncAngleThreshold)
+        )
+            return;
+
+        hasSyncedRotationAngle = true;
+        lastSyncedRotationAngle = normalizedAngle;
+        nextRotationSyncTime = Time.time + rotationSyncInterval;
+        player.SyncGrabRotation(normalizedAngle);
+    }
+
+    private static float NormalizeAngle(float angle)
+    {
+        return Mathf.DeltaAngle(0f, angle);
     }
 
     public void ResetStageSpawnState()
@@ -209,9 +269,12 @@ public class PlayerGrabController : MonoBehaviour
         isGrabHolding = false;
         grabControlInput = Vector2.zero;
         pressStartedAt = 0f;
+        nextRotationSyncTime = 0f;
+        lastSyncedRotationAngle = 0f;
+        hasSyncedRotationAngle = false;
         player.ChargeUI?.OffGrab();
 
         if (player.GrabObject != null)
-            player.GrabObject.localRotation = Quaternion.identity;
+            ApplyGrabRotation(0f);
     }
 }

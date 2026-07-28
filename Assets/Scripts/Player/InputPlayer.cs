@@ -77,6 +77,9 @@ public class InputPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnDeadChanged))]
     private bool syncIsDead;
 
+    [SyncVar(hook = nameof(OnGrabRotationChanged))]
+    private float syncGrabRotationZ;
+
     public PlayerMovement Movement { get; private set; }
     public PlayerPushController PushController { get; private set; }
     public PlayerGrabController GrabController { get; private set; }
@@ -680,6 +683,59 @@ public class InputPlayer : NetworkBehaviour
     public void Flip()
     {
         Movement?.Flip();
+    }
+
+    internal void SyncGrabRotation(float localZAngle)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        float normalizedAngle = NormalizeAngle(localZAngle);
+
+        if (isServer)
+        {
+            syncGrabRotationZ = normalizedAngle;
+            RpcApplyGrabRotation(normalizedAngle);
+            return;
+        }
+
+        CmdSyncGrabRotation(normalizedAngle);
+    }
+
+    [Command]
+    private void CmdSyncGrabRotation(float localZAngle)
+    {
+        float normalizedAngle = NormalizeAngle(localZAngle);
+        syncGrabRotationZ = normalizedAngle;
+        RpcApplyGrabRotation(normalizedAngle);
+    }
+
+    [ClientRpc]
+    private void RpcApplyGrabRotation(float localZAngle)
+    {
+        if (isLocalPlayer)
+            return;
+
+        ApplyGrabRotationLocal(localZAngle);
+    }
+
+    private void OnGrabRotationChanged(float oldValue, float newValue)
+    {
+        if (!isLocalPlayer)
+            ApplyGrabRotationLocal(newValue);
+    }
+
+    private void ApplyGrabRotationLocal(float localZAngle)
+    {
+        if (GrabController == null)
+            GrabController = GetComponent<PlayerGrabController>();
+
+        GrabController?.ApplyRemoteGrabRotation(NormalizeAngle(localZAngle));
+    }
+
+    private static float NormalizeAngle(float angle)
+    {
+        return Mathf.DeltaAngle(0f, angle);
     }
 
     public void SyncPunchAnim()
