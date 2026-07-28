@@ -119,6 +119,17 @@ public class SoundManager : MonoBehaviour
         float n = Mathf.Log10(Mathf.Max(volume, 0.0001f)) * 20;
         audioMixer.SetFloat(key, n);
         PlayerPrefs.SetFloat(key, volume);
+    }
+
+    // 변경된 볼륨 값을 디스크에 기록한다.
+    //
+    // PlayerPrefs.SetFloat은 메모리 캐시에만 쓰고, 실제 디스크 쓰기는 Save()가 한다.
+    // Save()를 SetSoundVolume 안에서 부르면 슬라이더를 드래그하는 동안
+    // 매 프레임 동기 디스크 쓰기가 발생해 프레임이 끊기므로,
+    // 사운드 설정 화면을 떠나는 시점에 한 번만 호출한다.
+    // (저장 전에 게임이 종료돼도 Unity가 OnApplicationQuit에서 자동으로 기록한다.)
+    public void SaveSoundVolumes()
+    {
         PlayerPrefs.Save();
     }
 
