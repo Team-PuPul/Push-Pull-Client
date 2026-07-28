@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Mirror;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -678,28 +679,90 @@ public class InputPlayer : NetworkBehaviour
         ApplyLocomotionAnimatorState(false, false, false);
         SetAnimatorBool(IsClearedHash, true);
 
-        if (gameObject.TryGetComponent(out SpriteRenderer sprite))
-            StartCoroutine(FadeOutSprite(sprite, 0.5f));
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+
+        if (sprites.Length > 0 || texts.Length > 0)
+            StartCoroutine(FadeOutClearVisuals(sprites, texts, 0.5f));
     }
 
-    private IEnumerator FadeOutSprite(SpriteRenderer sprite, float duration)
+    private IEnumerator FadeOutClearVisuals(
+        SpriteRenderer[] sprites,
+        TMP_Text[] texts,
+        float duration
+    )
     {
-        Color startColor = sprite.color;
-        float startAlpha = startColor.a;
+        float[] startSpriteAlphas = new float[sprites.Length];
+        float[] startTextAlphas = new float[texts.Length];
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            if (sprites[i] != null)
+                startSpriteAlphas[i] = sprites[i].color.a;
+        }
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            if (texts[i] != null)
+                startTextAlphas[i] = texts[i].color.a;
+        }
+
         float time = 0f;
 
         while (time < duration)
         {
             time += Time.deltaTime;
             float t = time / duration;
-            Color newColor = sprite.color;
-            newColor.a = Mathf.Lerp(startAlpha, 0f, t);
-            sprite.color = newColor;
+
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                SpriteRenderer sprite = sprites[i];
+
+                if (sprite == null)
+                    continue;
+
+                Color newColor = sprite.color;
+                newColor.a = Mathf.Lerp(startSpriteAlphas[i], 0f, t);
+                sprite.color = newColor;
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                TMP_Text text = texts[i];
+
+                if (text == null)
+                    continue;
+
+                Color newColor = text.color;
+                newColor.a = Mathf.Lerp(startTextAlphas[i], 0f, t);
+                text.color = newColor;
+            }
+
             yield return null;
         }
 
-        Color finalColor = sprite.color;
-        finalColor.a = 0f;
-        sprite.color = finalColor;
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            SpriteRenderer sprite = sprites[i];
+
+            if (sprite == null)
+                continue;
+
+            Color finalColor = sprite.color;
+            finalColor.a = 0f;
+            sprite.color = finalColor;
+        }
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            TMP_Text text = texts[i];
+
+            if (text == null)
+                continue;
+
+            Color finalColor = text.color;
+            finalColor.a = 0f;
+            text.color = finalColor;
+        }
     }
 }
